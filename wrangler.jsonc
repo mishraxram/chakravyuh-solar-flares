@@ -1,0 +1,14 @@
+// v2: Cloudflare Worker with static assets (Astro build in dist/) + /api routes in worker/index.ts.
+// Separate name from v1 (Pages project loglens-solarflares), so v1's URL is never touched.
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "loglens-v2",
+  "main": "./worker/index.ts",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "run_worker_first": ["/api/*"],
+    "not_found_handling": "404-page"
+  }
+}
