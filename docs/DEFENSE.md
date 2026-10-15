@@ -1,58 +1,112 @@
-# DEFENSE — know your project
+# DEFENSE — apna project samjho (simple Hinglish)
 
-## Architecture (5 bullets)
-1. One web page (`src/pages/index.astro`) is the whole tool. It runs in the browser.
-2. The browser parses the log, runs the rules and computes SHA-256. Raw files never leave the browser.
-3. For the AI summary, the browser sends only parsed event lines to our server function `/api/analyze` on Cloudflare.
-4. The server function adds the secret Gemini key, asks Gemini, checks the answer, and sends JSON back. If Gemini fails, the browser builds a rule-based summary instead.
-5. Evidence record + hash-chained audit trail are saved in the browser's localStorage. The report is an HTML file made in the browser.
+Is file ko judging se pehle 2 baar padho. Jawab ratne nahi hain, matlab samajhna hai.
 
-## File map
-| File | What it does |
+---
+
+## 1. Project kaise bana hai (5 points mein)
+1. **Ek hi webpage poora tool hai** (`src/pages/index.astro`). Ye browser mein chalta hai.
+2. **Browser khud kaam karta hai:** log padhta hai, 13 rules chalata hai, aur SHA-256 seal banata hai. Asli file computer se bahar nahi jaati.
+3. **AI ke liye** browser sirf events ki lines hamare server (`/api/analyze`, Cloudflare pe) ko bhejta hai.
+4. **Server** secret Gemini key lagata hai, Gemini se poochta hai, jawab check karta hai, aur wapas bhejta hai. Gemini fail ho to browser rules se khud summary bana deta hai.
+5. **Evidence ka record aur audit trail** browser ke localStorage mein save hote hain. Report (HTML/PDF) bhi browser hi banata hai.
+
+---
+
+## 2. Kaunsi file kya karti hai
+| File | Kaam |
 |---|---|
-| `src/lib/parse.ts` | Turns log text into events (time, user, role, ip, action, target, detail). Reads ERP CSV and Linux auth.log. Sorts by time. Keeps lines it cannot read in `unparsed`. |
-| `src/lib/rules.ts` | 10 rules that add red/amber flags with a reason (failed-login burst, new IP, marks jump, log deleted...). `ruleVerdict` counts high/medium. |
-| `src/lib/evidence.ts` | `sha256()` with Web Crypto, lock evidence (text or any file), verify, hash-chained audit trail, tamper test. |
-| `src/lib/prompts.ts` | The one Gemini prompt: what to write and the exact JSON shape. |
-| `functions/api/analyze.ts` | Server: validates input, calls Gemini with 8 s budget and 3 backup models, removes AI points that cite fake events, retries if Hindi reply is not Hindi. |
-| `src/pages/index.astro` | The page + its script: buttons, timeline, AI box, evidence locker, report download. |
-| `src/lib/report.ts` | Builds the downloadable HTML report, escaping all text. |
-| `src/layouts/Base.astro` | Page shell, fonts, footer with QR code (made at build time). |
-| `tests/eval.ts` | Runs 14 test cases through the real code and the live API. |
-| `public/samples/*` | 3 made-up sample logs for the "Try sample" buttons. |
+| `src/lib/parse.ts` | Log ki har line ko event banata hai (time, user, role, IP, action, target, detail). 3 format padhta hai: ERP CSV, Linux auth.log, Apache/Nginx log. Time ke hisaab se sort karta hai. Jo line samajh na aaye, use "not understood" mein rakhta hai, phenkta nahi. |
+| `src/lib/rules.ts` | 13 rules jo laal/amber flag lagate hain, reason ke saath (galat password ki burst, naya IP, marks jump, log delete, SQL injection...). |
+| `src/lib/changes.ts` | "Changes made" list: har update/delete ka kaun, kab, IP, pehle → baad, aur status (Unauthorized / Suspicious / Blocked / Normal). |
+| `src/lib/evidence.ts` | SHA-256 banata hai, evidence lock karta hai, sealed copy rakhta hai, verify karta hai, badli lines dhoondhta hai, aur hash-chained audit trail rakhta hai. |
+| `src/lib/prompts.ts` | Gemini ko jaane wala prompt: kya likhna hai aur JSON ka exact format. |
+| `functions/api/analyze.ts` | Server: input check, Gemini call (8 second limit, 3 backup models), galat event number wale AI points hatana, Hindi na aaye to dobara try. |
+| `src/lib/report.ts` | Download/PDF wali report banata hai. Har text ko safe (escape) karta hai. |
+| `src/pages/index.astro` | Page aur uske saare buttons ka code. |
+| `tests/eval.ts` | 16 test cases ko asli code aur live AI pe chala ke score batata hai. |
+| `public/samples/*` | 3 made-up sample logs, "Try sample" buttons ke liye. |
 
-## Demo path (what happens inside)
-1. Click "ERP marks tampering" → `index.astro` fetches `/samples/erp-marks-tamper.csv` → `lockEvidence()` in `evidence.ts` hashes the text and writes audit entry 1.
-2. `run()` → `parseLog()` (parse.ts) makes 19 events → `applyRules()` (rules.ts) adds flags → page draws red/amber rows → audit entry "TIMELINE_BUILT".
-3. Click "Analyze with AI" → browser sends up to 200 events (flagged first) + notes + language as JSON to `/api/analyze`.
-4. `analyze.ts` builds the prompt (prompts.ts), calls Gemini, parses JSON, drops bad citations, returns verdict/summary/indicators/hidden_patterns/next_steps. Browser shows it with the "AI generated" label. If it fails → `offlineSummary()` from the rules.
-5. Change 92 to 93 → "Verify integrity" → `verifyEvidence()` hashes the box again → different hash → TAMPERED, audit entry added.
-6. "Tamper test" → edits audit entry 1 without fixing hashes → `verifyAuditChain()` recomputes → "CHAIN BROKEN at entry 1".
-7. "Download report" → `buildReport()` (report.ts) → HTML file download.
+---
 
-## 10 hardest questions
-1. **Why do rules first and AI second?** Rules are fast, free and explainable; AI is slow and can be wrong. Rules give the evidence, AI connects it and explains it.
-2. **How does the burst rule work?** For each failed login, count failed logins from the same IP in the last 2 minutes. If 5 or more, flag all of them; a successful login from that IP within 15 minutes gets "login after burst".
-3. **How do you stop AI from inventing events?** The prompt says cite event numbers. The server then removes any indicator whose event numbers are not in the list we sent.
-4. **What is a hash chain?** Each audit entry stores the previous entry's hash, and its own hash covers that. Change one entry and its hash, and every link after it, stops matching.
-5. **Why SHA-256 in the browser, not the server?** The file never needs to leave the device, and Web Crypto is standard. The value equals `sha256sum`, so anyone can check.
-6. **Why 200 events max?** Keeps the prompt small, fast and cheap. We send flagged events first so important ones are never cut.
-7. **Why several Gemini models?** Some models were busy (503) or slow (5-9 s) during our build. We try flash-lite models in order within one 8 s budget.
-8. **Where is the API key?** Only in Cloudflare secrets and local `.dev.vars` (git-ignored). The browser never sees it.
-9. **Is the HTML report safe against a malicious log?** Yes, every value is escaped in `report.ts`, and the page uses `textContent`, not `innerHTML`.
-10. **What does "verdict" vs "confidence" mean?** Verdict = what happened (incident/suspicious/normal/unsure). Confidence = how sure the AI is about that verdict. We split them after the test set showed "high" was confusing on normal logs.
+## 3. Demo ke time andar kya hota hai
+1. **"ERP marks tampering" dabaya** → page sample file laata hai → `evidence.ts` uska SHA-256 banata hai aur sealed copy rakhta hai → audit trail mein entry 1.
+2. **Timeline bani** → `parse.ts` 19 events banata hai → `rules.ts` flag lagata hai → `changes.ts` "Changes made" list banata hai → page laal/amber rows dikhata hai.
+3. **"Analyze with AI" dabaya** → browser 200 tak events (flagged wale pehle) server ko bhejta hai.
+4. **Server** prompt banata hai, Gemini se poochta hai, galat citation hatata hai, aur verdict, summary, points, "beyond the rules" aur next steps wapas bhejta hai. Fail ho to rules wala offline summary.
+5. **92 ko 93 kiya, "Verify" dabaya** → naya hash bana → purane se alag → TAMPERED → sealed copy se compare karke badli line dikhayi.
+6. **"Restore original"** → sealed copy wapas box mein → hash phir same → MATCH.
+7. **"Tamper test"** → audit ki entry 1 chupke se badli → chain check fail → "CHAIN BROKEN at entry 1".
+8. **"Save report as PDF"** → `report.ts` report banata hai → print window → Save as PDF.
 
-## 5 weak spots (honest answers)
-1. **Only 3 log formats.** "Limitation. Next we add Windows event logs and firewall logs; the parser is built so a new format is one function."
-2. **Audit trail is in one browser.** "Editing is detected, but deleting the whole trail is not. Next: send each entry hash to a server or a timestamp service as a receipt."
-3. **Rules use fixed numbers (5 fails in 2 min, 06:00-23:00).** "They fit our college story. Next: make them settings per organisation."
-4. **Test set is small and written by us.** "14 cases show the demo path is stable, not real-world accuracy. Next: test on public log datasets."
-5. **AI answers vary run to run.** "That is why every point cites events and we show a label. Temperature is low (0.2) and we validate the JSON."
+---
 
-## AI tools disclosure
-Claude Code wrote most of the code, rules and test cases under our direction; we chose the problem, story, scope and demo, and reviewed results. Gemini is used inside the app for analysis. Say this openly if asked.
+## 4. Judges ke sabse tough sawaal (aur simple jawab)
 
-## New questions (change register, restore)
-11. **How do you decide "Unauthorized"?** A change is unauthorized if it has a high-risk flag, or if the login that started its session (same user + same IP) had one, e.g. a login right after a failed-login burst. Medium flags only → Suspicious. "DENIED" in the log → Blocked attempt.
-12. **Can you say which person did it?** We show the account and IP. An account can be stolen, so we never name a person; the reasons explain why the account looks hijacked. Next step for the investigator: map the IP via the network/DHCP logs.
-13. **How does restore work?** When text evidence is locked we keep a sealed copy in the browser. If the hash later differs we compare line by line and can put the original back. Limit: only for evidence locked in this browser; for real data recovery you still need the system's database backup.
+**1. Rules pehle aur AI baad mein kyun?**
+Rules tez hain, free hain, aur har flag ka reason batate hain. AI slow hai aur galat bhi ho sakta hai. Isliye rules sabut dhoondhte hain, AI unhe jod ke kahani batata hai.
+
+**2. Galat password wala (burst) rule kaise kaam karta hai?**
+Ek hi IP se 2 minute mein 5 ya zyada galat password aaye, to sab pe flag lagta hai. Uske 15 minute ke andar usi IP se sahi login ho, to us login pe "password guess ho gaya" wala flag lagta hai.
+
+**3. AI apni taraf se event na bana de, ye kaise rokte ho?**
+Prompt mein likha hai ki har point ke saath event number do. Phir server check karta hai: jo point aisa event number bataye jo log mein hai hi nahi, use hata deta hai.
+
+**4. Hash chain kya hai?**
+Audit trail ki har entry mein pichli entry ka hash hota hai, jaise zanjeer ki kadiyan. Beech ki ek entry badlo to aage ki saari kadiyan toot jaati hain, aur app batata hai kahan se toota.
+
+**5. SHA-256 browser mein kyun, server pe kyun nahi?**
+Taaki asli file computer se bahar na jaye. Browser ka Web Crypto standard hai, aur hamara hash `sha256sum` command ke hash se exact match karta hai, to koi bhi khud check kar sakta hai.
+
+**6. Sirf 200 events AI ko kyun?**
+Prompt chhota rahe, jawab jaldi aaye aur kharcha kam ho. Flagged events pehle bhejte hain, to zaroori wale kabhi nahi chhoot-te.
+
+**7. Gemini ke itne models kyun?**
+Build ke time kuch models busy the ya 5-9 second le rahe the. Isliye fast "flash-lite" models ek ke baad ek try karte hain, sab 8 second ke andar.
+
+**8. API key kahan hai?**
+Sirf Cloudflare ke secret mein aur local `.dev.vars` file mein, jo GitHub pe nahi jaati. Browser ko key kabhi nahi dikhti.
+
+**9. Koi kharab (malicious) log daale to report safe hai?**
+Haan. Report mein har text escape hota hai, aur page `textContent` use karta hai, `innerHTML` nahi. Isliye log mein chhupa code chal nahi sakta.
+
+**10. Verdict aur confidence mein farak?**
+Verdict = kya hua (incident / suspicious / normal / unsure). Confidence = AI ko apne verdict pe kitna yakeen hai. Testing mein dikha ki normal log pe "high" confusing lag raha tha, isliye dono alag kiye.
+
+**11. "Unauthorized" kaise decide karte ho?**
+Badlav pe high-risk flag ho, ya jis login se woh badlav hua (same user + same IP) uspe high-risk flag ho. Jaise login 5 galat password ke baad hua. Sirf medium flag ho to "Suspicious". Log mein "DENIED" likha ho to "Blocked attempt".
+
+**12. Kya bata sakte ho kis insaan ne kiya?**
+Hum account aur IP batate hain. Insaan ka naam nahi bolte, kyunki account chori ho sakta hai. Reasons batate hain ki account hijack kyun lag raha hai. Asli insaan tak pahunchne ke liye IT team us IP ko network logs se match karegi.
+
+**13. Restore kaise hota hai?**
+Lock karte waqt hum ek sealed copy browser mein rakhte hain. Baad mein hash alag aaye to line-by-line compare karke badli lines dikhate hain, aur ek click mein original wapas daal dete hain. Limit: ye usi browser mein chalta hai jahan lock kiya tha. Database ke asli data ke liye system ka backup chahiye.
+
+---
+
+## 5. Kamzoriyan (honest jawab)
+Judge kamzori pooche to chhupao mat. Seedha bolo "ye limitation hai, aage hum ye karenge":
+
+1. **Sirf 3 log format chalte hain.** "Aage Windows event logs aur firewall logs jodenge. Naya format jodna ek function ka kaam hai."
+2. **Audit trail ek hi browser mein hai.** "Edit pakda jata hai, par koi poori history hi mita de to nahi. Aage har entry ka hash server pe bhi rakhenge."
+3. **Rules ke numbers fixed hain** (2 minute mein 5 galat password, 6 se 23 baje working hours). "Ye hamari college story ke liye set hain. Aage har organisation apne hisaab se set kar payega."
+4. **Test set chhota hai aur humne khud banaya.** "16 cases dikhate hain ki demo stable hai, ye real-world accuracy nahi hai. Aage public log datasets pe test karenge."
+5. **AI ka jawab har baar thoda alag hota hai.** "Isliye har point event number se juda hai, label laga hai, temperature kam (0.2) rakha hai aur JSON check hota hai."
+
+---
+
+## 6. AI tools ka sach (koi pooche to seedha bolo)
+"Code, rules aur test cases Claude Code ne hamare direction mein likhe. Problem, story, scope aur demo humne chuna, aur results humne check kiye. App ke andar analysis Google Gemini karta hai."
+
+---
+
+## 7. `node tests/eval.ts` kya hai?
+Ye hamara **automatic test** hai. Isse chalane pe 16 sample logs ek-ek karke hamare asli code aur live AI pe chalte hain, aur har ek ka result PASS ya FAIL aata hai. Aakhir mein score dikhta hai, jaise `RESULT 16/16`.
+
+**Kaise chalayein:** project folder mein terminal kholo aur likho:
+```
+node tests/eval.ts
+```
+1-2 minute lagte hain, kyunki AI wale cases live Gemini se poochte hain.
+
+**Judge ko kya bolna:** "Humne apna tool khud test kiya. Ye command 16 cases chalata hai, aur har case pe pehle se likha hai ki sahi jawab kya hona chahiye. Score `docs/TESTSET.md` mein likha hai, fails ke saath."
