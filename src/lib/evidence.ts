@@ -17,6 +17,7 @@ const entryHash = (e: Omit<AuditEntry, 'hash'>) => sha256(`${e.prev}|${e.at}|${e
 
 const KEY_EVIDENCE = 'loglens.evidence';
 const KEY_AUDIT = 'loglens.audit';
+const KEY_ORIGINAL = 'loglens.original'; // sealed copy of the text at lock time, used to show and undo changes
 
 // localStorage can fail (private mode), so every access is wrapped
 function read<T>(key: string, fallback: T): T {
@@ -64,6 +65,7 @@ export function tamperAuditForDemo() {
 
 export async function lockEvidence(name: string, text: string): Promise<Evidence> {
   memEvidence = { name, size: new TextEncoder().encode(text).length, hash: await sha256(text), lockedAt: now(), kind: 'text' };
+  write(KEY_ORIGINAL, text.length <= 2_000_000 ? text : null);
   write(KEY_EVIDENCE, memEvidence);
   await audit('EVIDENCE_LOCKED', `${name} · ${memEvidence.size} bytes · SHA-256 ${memEvidence.hash}`);
   return memEvidence;
@@ -90,6 +92,18 @@ export async function verifyEvidence(data: string | ArrayBuffer) {
 }
 
 export function clearCase() {
-  memAudit = []; memEvidence = null;
+  memAudit = []; memEvidence = null; write(KEY_ORIGINAL, null);
   write(KEY_AUDIT, memAudit); write(KEY_EVIDENCE, null);
+}
+
+// The sealed copy saved when the text evidence was locked (null for files or if storage failed)
+export const getOriginal = (): string | null => read<string | null>(KEY_ORIGINAL, null);
+
+// Line-by-line comparison: which lines differ between the sealed copy and the current text
+export function changedLines(original: string, current: string) {
+  const a = original.split(/\r?\n/), b = current.split(/\r?\n/);
+  const out: { line: number; before: string; after: string }[] = [];
+  for (let i = 0; i < Math.max(a.length, b.length); i++)
+    if (a[i] !== b[i]) out.push({ line: i + 1, before: a[i] ?? '(line missing)', after: b[i] ?? '(line removed)' });
+  return out;
 }

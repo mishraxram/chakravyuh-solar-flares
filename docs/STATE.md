@@ -28,6 +28,7 @@ Repo: https://github.com/mishraxram/chakravyuh-solar-flares
 - Ship: secrets scan clean, clean clone from GitHub builds + runs in 3 commands (no key -> AI "not configured", offline path), final deploy, e2e on live: all demo steps pass, 0 JS errors.
 - Premium UI redesign (13:12): two-column evidence desk, evidence tag with hole+string, timeline rail with seal dots, big verdict banner, segmented EN/हिंदी, empty state, phone auto-scroll to result. e2e on prod: all pass, 0 errors.
 - Check kit: docs/CHECK_KIT.md (6 paste tests verified with rules, tamper checks, pre-stage list). Slide deck: https://claude.ai/artifact/C3p7eQ1CCxardURKkz7Mu3 (7 slides + speaker notes).
+- 13:48 Change register (who/when/IP/before->after/status), Save report as PDF (print), sealed copy + changed-lines diff + Restore original. e2e on prod pass.
 
 ## Doing
 - Shipped. Waiting: user records demo video + screenshots, rehearses with docs/PITCH.md and docs/DEFENSE.md

@@ -1,6 +1,7 @@
 // Builds a self-contained HTML investigation report (downloaded as a file).
 import type { LogEvent } from './parse.ts';
 import type { Evidence, AuditEntry } from './evidence.ts';
+import { extractChanges, STATUS_TEXT } from './changes.ts';
 
 type Ai = { source: string; verdict: string; hidden_patterns?: { events: number[]; text: string }[]; model?: string; summary: string; indicators: { events: number[]; text: string }[]; confidence: string; next_steps: string[] } | null;
 
@@ -13,8 +14,9 @@ export function buildReport(opts: {
 }) {
   const { evidence, verify, events, notes, ai, audit, chainBrokenAt, generatedAt } = opts;
   const flagged = events.filter((e) => e.flags.length);
+  const changes = extractChanges(events);
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>LogLens investigation report</title>
-<style>body{font-family:system-ui,"Noto Sans Devanagari",sans-serif;max-width:900px;margin:24px auto;padding:0 16px;color:#14161A}
+<style>@media print{h2{break-after:avoid}tr{break-inside:avoid}}body{font-family:system-ui,"Noto Sans Devanagari",sans-serif;max-width:900px;margin:24px auto;padding:0 16px;color:#14161A}
 code,td.m{font-family:ui-monospace,monospace;font-size:12px}table{border-collapse:collapse;width:100%}td,th{border:1px solid #ccc;padding:4px;text-align:left;vertical-align:top;font-size:13px}
 .bad{color:#C2362B;font-weight:600}.ok{color:#2F7D4F;font-weight:600}.tag{background:#E0A526;padding:2px 6px}</style></head><body>
 <h1>LogLens investigation report</h1>
@@ -24,6 +26,11 @@ ${notes.length ? `<h2>Case notes</h2>${notes.map((n) => `<p>${esc(n)}</p>`).join
 ${evidence ? `<p><span class="tag">EVIDENCE</span> ${esc(evidence.name)} · ${evidence.size} bytes · locked ${esc(evidence.lockedAt)}</p>
 <p>SHA-256 at lock: <code>${esc(evidence.hash)}</code></p>
 <p>Integrity check: ${verify ? (verify.match ? '<span class="ok">MATCH: evidence unchanged</span>' : `<span class="bad">TAMPERED: hash mismatch</span><br>Current SHA-256: <code>${esc(verify.current)}</code>`) : 'not run'}</p>` : '<p>No evidence locked.</p>'}
+<h2>Changes made (${changes.length}, ${changes.filter((c) => c.status === 'unauthorized').length} unauthorized)</h2>
+<p><small>"Who" is the account that made the change. An account can be stolen, so read the reasons.</small></p>
+<table><tr><th>#</th><th>Time</th><th>Who / IP</th><th>What</th><th>Before → After</th><th>Status and reasons</th></tr>
+${changes.map((c) => `<tr><td>${c.n}</td><td class="m">${esc(c.timeText)}</td><td class="m">${esc(c.user)} (${esc(c.role)})<br>${esc(c.ip)}</td><td class="m">${esc(c.action)} ${esc(c.target)}</td><td class="m">${c.before ? `${esc(c.before)} → ${esc(c.after)}` : esc(c.after)}</td><td><div class="${c.status === 'unauthorized' ? 'bad' : c.status === 'normal' ? 'ok' : ''}">${STATUS_TEXT[c.status]}</div>${c.reasons.map((r) => `<div>${esc(r)}</div>`).join('')}</td></tr>`).join('') || '<tr><td colspan="6">No data changes in this log.</td></tr>'}
+</table>
 <h2>Flagged events (${flagged.length} of ${events.length})</h2>
 <table><tr><th>#</th><th>Time</th><th>User / IP</th><th>Action</th><th>Why flagged</th></tr>
 ${flagged.map((e) => `<tr><td>${e.n}</td><td class="m">${esc(e.timeText)}</td><td class="m">${esc(e.user)}<br>${esc(e.ip)}</td><td class="m">${esc(e.action)} ${esc(e.target)} ${esc(e.detail)}</td><td>${e.flags.map((f) => `<div class="${f.severity === 'high' ? 'bad' : ''}">${esc(f.reason)}</div>`).join('')}</td></tr>`).join('')}
