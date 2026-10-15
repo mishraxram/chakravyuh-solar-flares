@@ -5,6 +5,7 @@ import QRCode from 'qrcode';
 
 // QR code of the live URL, made at build time (no extra script in the browser)
 const LIVE_URL = 'https://loglens-solarflares.pages.dev';
+const FONTS_URL = 'https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;600;700&family=IBM+Plex+Sans+Condensed:wght@600;700&family=Noto+Sans+Devanagari:wght@400;600&display=swap';
 const qrSvg = await QRCode.toString(LIVE_URL, { type: 'svg', margin: 1, color: { dark: '#14161A', light: '#F4F1EA' } });
 const { title = 'LogLens', description = 'AI-assisted digital forensics: log timeline, AI summary and SHA-256 evidence check.' } = Astro.props;
 ---
@@ -20,7 +21,10 @@ const { title = 'LogLens', description = 'AI-assisted digital forensics: log tim
     <meta property="og:url" content={LIVE_URL} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;600;700&family=IBM+Plex+Sans+Condensed:wght@600;700&family=Noto+Sans+Devanagari:wght@400;600&display=swap" rel="stylesheet" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Fonts load without blocking the first paint: system font shows first, then swaps -->
+    <link rel="preload" as="style" href={FONTS_URL} onload="this.onload=null;this.rel='stylesheet'" />
+    <noscript><link rel="stylesheet" href={FONTS_URL} /></noscript>
   </head>
   <body class="font-sans min-h-screen flex flex-col">
     <main class="flex-1 w-full max-w-6xl mx-auto px-4 py-6 lg:py-10">
