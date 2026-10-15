@@ -22,14 +22,15 @@ Repo: https://github.com/mishraxram/chakravyuh-solar-flares
 - Must-have 3: SHA-256 evidence tag (matches sha256sum), verify MATCH/TAMPERED, audit trail (localStorage), HTML report download, live.
 - Eval: 14/14 x3 runs after fixes (verdict field, impossible-travel rule, Hindi retry)
 - judge-me (~73/100) fixes: AI "beyond the rules" hidden_patterns; hash-chained audit trail + tamper test button (e2e: OK -> BROKEN at entry 1)
+- Polish: QR code (build-time SVG), 44px buttons, focus ring, any-file SHA-256 (bytes + metadata) with re-verify, README rewrite, og tags. e2e 360px: no h-scroll, no small buttons, 0 errors
 
 ## Doing
-- Polish (QR, touch targets, any-file hashing, README)
+- Pitch / demo prep
 
 ## Next 3 actions
-1. Polish: QR code, 44px targets, 16px text
-2. Any-file evidence hashing (bytes + metadata), Apache log parser if time
-3. Polish + QR code + README AI usage
+1. Pitch + DEMO_SCRIPT update (tamper-test + file hashing scenes)
+2. defend: practise judge Q&A
+3. ship check at Gate C (15:15): clean clone test, final deploy
 
 ## Notes
 - Gemini: gemini-2.5-flash not available to this key; big flash models busy/slow (5-9s). Using flash-lite chain. Latency 5-8s is close to the 8s limit: fallback kicks in if slower.

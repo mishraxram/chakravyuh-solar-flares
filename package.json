@@ -12,6 +12,7 @@
   "dependencies": {
     "@tailwindcss/vite": "^4.3.3",
     "astro": "^5.18.2",
+    "qrcode": "^1.5.4",
     "tailwindcss": "^4.3.3"
   },
   "devDependencies": {

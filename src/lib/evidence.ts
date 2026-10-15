@@ -1,12 +1,14 @@
 // Evidence integrity: SHA-256 hashing (browser Web Crypto) + audit trail kept in localStorage.
 
-export async function sha256(text: string): Promise<string> {
-  const bytes = new TextEncoder().encode(text);
+// Hashes text (log pasted in the box) or raw bytes (any uploaded file: PDF, image...)
+export async function sha256(data: string | ArrayBuffer): Promise<string> {
+  const bytes = typeof data === 'string' ? new TextEncoder().encode(data) : data;
   const digest = await crypto.subtle.digest('SHA-256', bytes);
   return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, '0')).join('');
 }
 
-export type Evidence = { name: string; size: number; hash: string; lockedAt: string };
+// kind 'text' = the log in the box; kind 'file' = a non-text file, verified by choosing it again
+export type Evidence = { name: string; size: number; hash: string; lockedAt: string; kind?: 'text' | 'file'; type?: string; lastModified?: string };
 // Each audit entry stores the hash of the entry before it (a hash chain).
 // If anyone edits or deletes an old entry, the hashes after it stop matching.
 export type AuditEntry = { at: string; action: string; detail: string; prev: string; hash: string };
@@ -61,16 +63,27 @@ export function tamperAuditForDemo() {
 }
 
 export async function lockEvidence(name: string, text: string): Promise<Evidence> {
-  memEvidence = { name, size: new TextEncoder().encode(text).length, hash: await sha256(text), lockedAt: now() };
+  memEvidence = { name, size: new TextEncoder().encode(text).length, hash: await sha256(text), lockedAt: now(), kind: 'text' };
   write(KEY_EVIDENCE, memEvidence);
   await audit('EVIDENCE_LOCKED', `${name} · ${memEvidence.size} bytes · SHA-256 ${memEvidence.hash}`);
   return memEvidence;
 }
+
+// Any file (PDF, image, zip...): hash the raw bytes and keep its metadata
+export async function lockFile(f: File): Promise<Evidence> {
+  memEvidence = {
+    name: f.name, size: f.size, hash: await sha256(await f.arrayBuffer()), lockedAt: now(), kind: 'file',
+    type: f.type || 'unknown', lastModified: new Date(f.lastModified).toLocaleString('en-IN', { hour12: false }),
+  };
+  write(KEY_EVIDENCE, memEvidence);
+  await audit('EVIDENCE_LOCKED', `${f.name} · ${f.size} bytes · ${memEvidence.type} · modified ${memEvidence.lastModified} · SHA-256 ${memEvidence.hash}`);
+  return memEvidence;
+}
 export const getEvidence = () => memEvidence;
 
-export async function verifyEvidence(text: string) {
+export async function verifyEvidence(data: string | ArrayBuffer) {
   if (!memEvidence) return null;
-  const current = await sha256(text);
+  const current = await sha256(data);
   const match = current === memEvidence.hash;
   await audit(match ? 'VERIFY_MATCH' : 'VERIFY_TAMPERED', `${memEvidence.name} · now ${current}`);
   return { match, current, original: memEvidence.hash };

@@ -13,3 +13,8 @@
 }
 
 body { background: var(--color-paper); color: var(--color-ink); }
+
+/* Touch targets at least 44px, clear keyboard focus */
+button, .btn-like { min-height: 44px; }
+:focus-visible { outline: 3px solid var(--color-tag); outline-offset: 2px; }
+label:has(input.sr-only:focus-visible) { outline: 3px solid var(--color-tag); outline-offset: 2px; }

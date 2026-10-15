@@ -5,27 +5,45 @@
 > **Problem Statement ABCS-02: AI-Assisted Digital Forensics** (Domain 3: AI-Based Cybersecurity)
 > An AI-assisted platform that analyzes digital artifacts, correlates events, reconstructs incident timelines and maintains evidence integrity with SHA-256 hashing and an audit trail. [Full statement](docs/PROBLEM.md)
 
-**AI usage:** Built with Claude Code (scaffolding and UI) and Gemini API (analysis). Problem framing, scope, prompt design and test set are ours.
-
 **Live:** https://loglens-solarflares.pages.dev
 
 ## Problem
-Investigators (e.g. a college IT cell after ERP marks were changed at night) must dig through thousands of log lines, rebuild what happened, and prove the logs were not edited.
+After an incident (example: college ERP marks changed at 2 AM), an investigator has thousands of log lines. They must find who did what and when, and prove the logs were not edited afterwards.
 
 ## Solution: LogLens
-1. Paste/upload a log -> sorted incident timeline with rule-based red flags.
-2. AI investigation summary (Gemini) linked to event numbers, English/Hindi.
-3. Evidence locker: SHA-256 hash, tamper check, audit trail, downloadable report.
+1. **Timeline + red flags.** Paste or upload an ERP audit CSV or a Linux `auth.log`. Events are sorted by time and 10 explainable rules flag them: failed-login bursts, login right after a burst, new IP, shared IP, impossible travel, off-hours activity, student role changing records, big marks jumps, deleted logs, direct root login.
+2. **AI investigation summary (Gemini).** Gives a verdict (incident / suspicious / normal / unsure), a confidence level, indicators that cite event numbers, "AI found beyond the rules" patterns, and next steps. Works in English and Hindi.
+3. **Evidence locker.** SHA-256 hash of the log, or of any file (PDF, image...) as raw bytes with its metadata. Verify shows MATCH or TAMPERED. The audit trail is hash-chained: if any entry is edited, the chain shows where it broke. Download an HTML investigation report.
 
-## How to run
+**Failure path:** if Gemini is slow (over 8 s) or down, the app shows an offline summary built from the rules, clearly labelled "Not AI generated". If evidence is thin, it says "Not enough evidence" and what to collect next. Lines it cannot read are counted and shown, never dropped.
+
+## How to run (3 commands)
 ```bash
 npm install
-cp .env.example .dev.vars   # add your GEMINI_API_KEY
+cp .env.example .dev.vars        # then put your GEMINI_API_KEY in .dev.vars
 npm run build && npx wrangler pages dev dist
 ```
+Open http://localhost:8788. Without a key, everything works except the AI summary, which falls back to the offline rules summary.
+
+## Tests
+- `node tests/eval.ts`: runs 14 cases from [docs/TESTSET.md](docs/TESTSET.md) through the real parser, rules, hashing and the live AI API.
+- Latest result: 14/14 in 3 runs (before fixes: 11/14, 13/14, 11/14). It is a small set we wrote ourselves, so it shows the demo path is stable. It does not prove accuracy on all real-world logs.
+- `node scripts/check-rules.ts` prints the flags for the 3 sample logs. `node scripts/check-hash.ts` shows a 1-character edit changing the SHA-256.
+
+## AI usage and data
+- **In the product:** Google Gemini (flash-lite models, with backups if one is busy) is called from a Cloudflare Pages Function (`functions/api/analyze.ts`). The key stays on the server. The prompt is in `src/lib/prompts.ts`.
+- **What is sent:** only the parsed event lines (max 200, flagged ones first) and the case notes. Raw uploaded files and hashes stay in the browser. The audit trail and evidence record are kept in the browser's localStorage.
+- **Checks on AI output:** indicators that cite event numbers not in the log are removed. If Hindi is asked and the reply is not in Hindi, the next model is tried.
+- **Building it:** made with Claude Code (scaffolding and UI). Problem framing, scope, prompt design and the test set are ours.
+
+## Limits (honest)
+- Supports 2 log formats (ERP audit CSV, Linux auth.log). Other formats show "Not a supported log".
+- The audit trail lives in one browser. The hash chain shows edits, but someone who deletes the whole trail can start fresh. A server copy of the hashes is the next step.
+- The report supports an investigation. It is not a legal certificate.
+- All logs in the app's "Try sample" buttons and in `tests/cases/` are made-up sample data.
 
 ## Tech
-Astro + Tailwind, TypeScript, Cloudflare Pages Functions, Gemini API, Web Crypto (SHA-256).
+Astro + Tailwind, TypeScript, Cloudflare Pages + Pages Functions, Google Gemini API, Web Crypto (SHA-256), `qrcode` (QR code made at build time).
 
 ## Team
 SOLAR FLARES (HK26-0014)
