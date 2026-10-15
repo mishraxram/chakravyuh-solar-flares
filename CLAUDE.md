@@ -69,3 +69,39 @@ Time keeping: check the current time with a shell command at the start of each s
 
 Only stop and ask him at these points: concept choice, plan approval, anything needing his keys or logins (API key in .env, npx wrangler login), deploy project name, and anything risky. Everything else, keep moving.
 Slash commands (/ps-decode etc.) still work if he types them.
+
+---
+
+# Upgrade pass (added 2026-10-16, from claude-code-bootstrap.md). Rules above still win.
+
+## Project block
+- NAME: LogLens (team SOLAR FLARES, HK26-0014)
+- PROBLEM + TARGET USER: ABCS-02 AI-Assisted Digital Forensics. College IT / cyber cell investigators who need a log timeline, AI summary and SHA-256 evidence proof. See docs/PROBLEM.md.
+- HACKATHON + THEME: CHAKRAVYUH 1.0, BIET Lucknow. Domain 3: AI-Based Cybersecurity.
+- JUDGING CRITERIA: not received yet (user will send). Until then, map features to the 6 expected solution points in docs/PROBLEM.md.
+- CONSTRAINTS: 3-minute demo. No new major features in this pass.
+- DEMO DATE: 22 Oct 2026
+
+## Upgrade-pass rules (from the user)
+- Work on branch `upgrade` (safety tag `pre-upgrade-v1`). Push the branch after each commit. Merge to main only after the live URL is verified.
+- Deploy stays on Cloudflare Pages (no Workers migration). Branch builds go to the Pages preview (`--branch upgrade`); production only after merge.
+- After every change run `node tests/eval.ts`. If any case fails, revert that change.
+- Measure Lighthouse on the live URL, report before and after.
+- Only gaps, polish, hardening and demo reliability. No new major features.
+
+## Stack note
+- Bootstrap asked for Astro on Cloudflare Workers. We keep Cloudflare Pages + Pages Functions (see docs/DECISIONS.md). Every live feature has an offline fallback.
+
+## Extra rules (anti-hallucination)
+1. Verify every library, API, flag and CLI command by docs or by running it. If unverified, mark UNVERIFIED and do not ship it.
+2. No fake stats, testimonials, benchmarks, user counts or awards. Demo data is labelled "sample data".
+3. Never claim something works without showing the command output.
+4. No marketing language in reports: what was built, how to verify, what is risky.
+5. Secrets only via `wrangler pages secret`. Never commit .env or .dev.vars.
+
+## Extra definition of done
+- Lighthouse >= 90 on performance, accessibility, best practices, SEO (live URL, mobile).
+- Zero console errors on the main flow. Build passes clean.
+- Main flow under 60 seconds for a first-time user.
+- Works with the network off for AI via the rule-based fallback.
+- Every feature maps to at least one judging criterion (or PS solution point until criteria arrive).
