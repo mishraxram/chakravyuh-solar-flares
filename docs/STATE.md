@@ -1,5 +1,17 @@
 # STATE
 
+## v2 (branch loglens-v2) - updated 2026-10-16 01:10 IST
+Event: अvinya '26 Hackathon 4.0. **Round 1 idea submission due 18 Oct 12:00 IST.** Judging 23 Oct 09:30. Freeze 20 Oct 23:59.
+v2 URL: https://loglens-v2.loglens.workers.dev (Worker `loglens-v2`). v1 untouched (tag pre-v2-baseline).
+Plan: docs/PLAN-v2.md. Research: docs/RESEARCH.md. Decisions: docs/DECISIONS.md.
+- DONE F1 Workers port (static assets + /api, same API code as v1). Eval local 15/16, 16/16, 16/16 (case 9 Hindi >8s once, same flake as v1).
+- DONE F2 perf: inline CSS + non-blocking fonts. Lighthouse live mobile 100/100/100/100 (2 of 3 runs; run 1 hit a stale HTML -> 404 CSS right after deploy: 97/96/96/100).
+- DONE F6 part 1: rate limit (local counter 20/min/IP + CF binding), 413 over 256 KB, 415 non-JSON. Live 429 verified on a one-connection burst. Best effort only.
+- WAITING user: `npx wrangler secret put GEMINI_API_KEY` for loglens-v2 (live AI says "AI not configured" until then).
+- TODO F6 part 2: lint + typecheck. Next: F3 signed receipt (17 Oct), Round 1 submission.
+
+# v1 STATE
+
 T+0 (start): 2026-10-15 12:09 IST. User target: ready in 4 hours (16:09).
 Concept: ABCS-02 AI-Assisted Digital Forensics ("LogLens"). See docs/PLAN.md.
 Live: https://loglens-solarflares.pages.dev (Cloudflare Pages project `loglens-solarflares`, GEMINI_API_KEY secret set)
