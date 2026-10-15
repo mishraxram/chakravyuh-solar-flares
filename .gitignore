@@ -1,0 +1,14 @@
+.env
+.env.*
+!.env.example
+node_modules/
+dist/
+.astro/
+.wrangler/
+.dev.vars
+_trash/
+*.log
+.DS_Store
+build/
+.dart_tool/
+.claude/settings.local.json
