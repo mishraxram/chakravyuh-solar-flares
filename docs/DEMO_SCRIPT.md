@@ -1,39 +1,114 @@
-# DEMO SCRIPT (3 minutes)
+# DEMO SCRIPT (3 minute) — simple Hinglish
 
-Live: https://loglens-solarflares.pages.dev · Before the demo: click "New case" so the audit trail starts clean.
+**App ka link:** https://loglens-solarflares.pages.dev
+**Slides ka link:** https://claude.ai/artifact/C3p7eQ1CCxardURKkz7Mu3
 
-## Scene 1 — Problem (0:00-0:35)
-- Judge sees: the tool page (input box + 3 "Try sample" buttons).
-- Say the hook from docs/PITCH.md: marks 42 → 92 at 2 AM, professor says he did not log in.
+Judges English pasand karein to English lines `docs/PITCH.md` mein hain. Neeche **"Bolo"** wali lines ko apne shabdon mein bolo, ratna nahi hai.
 
-## Scene 2 — Timeline + flags (0:35-1:00)
-- Click: "ERP marks tampering" (loads, locks evidence and builds the timeline).
-- Judge sees: HIGH RISK banner, red rows #8-#17: 5 failed logins in 2 min, login at 02:07 from new IP, marks 42→92 and 35→88, audit_log deleted.
-- Say: "Rules run instantly, no AI. Each red row has a reason."
-- Data: `public/samples/erp-marks-tamper.csv` (sample).
+---
 
-## Scene 3 — AI summary (1:00-1:35)
-- Click: "Analyze with AI" (English). Wait 5-8 s.
-- Judge sees: "AI generated" label, Verdict: INCIDENT, indicators with #event numbers, dashed "AI found beyond the rules" box, next steps.
-- Click: हिंदी → "Analyze with AI" again (Hindi summary).
-- Say: "Only parsed lines go to Gemini. Every AI claim cites events, so the investigator can check it."
-- If AI is slow/down: the grey "Offline summary from rules — Not AI generated" box appears. Say so honestly and continue.
+## Shuru karne se 5 minute pehle
+1. App ka link kholo.
+2. Left side neeche **"New case"** dabao, taaki sab saaf ho jaye.
+3. Ek baar **"ERP marks tampering"** dabao, phir **"Analyze with AI"** dabao. Isse AI "jaag" jata hai aur demo mein slow nahi hoga.
+4. Phir se **"New case"** dabao.
+5. Browser zoom 110-125% rakho, taaki judges padh sakein.
 
-## Scene 4 — Tamper proof (1:35-2:00)
-- In the text box, change `42->92` to `42->93`. Click "Verify integrity".
-- Judge sees: red "TAMPERED: hash mismatch" with locked vs now hashes.
-- Open "Audit trail (hash-chained)" → click "Tamper test: secretly edit audit entry 1".
-- Judge sees: "CHAIN BROKEN at entry 1".
-- Say: "One character changed and the hash changed completely. Even our own audit trail shows if someone edits it."
+---
 
-## Scene 5 — Report + any file (2:00-2:10, optional if time)
-- Click "Download report" and open it: hashes, flags, AI summary, audit chain status.
-- Optional: "Upload log or any evidence file" → pick a PDF → evidence tag shows type + last modified + SHA-256.
+## Step 1: Problem batao (0:00 - 0:30)
+**Screen:** Slide 1, 2 aur 3.
 
-## Scene 6 — Close (2:10-3:00)
-- Tech line, test result (11/14 → 14/14), next steps, QR code in the footer: "Scan and try your own log."
+**Bolo:**
+"Result week hai. Ek subah student ke DBMS marks 42 se 92 ho gaye. Professor bolte hain: maine raat ko login hi nahi kiya. IT team ke paas hazaron log lines hain. Sawaal ye hai: kisne kiya, aur kya hum in logs pe bharosa kar sakte hain?"
 
-## New (13:50) — Changes made, Restore, PDF
-- After Scene 2, point at "Changes made": 6 changes, 3 unauthorized. Read one card: "02:09, prof.verma from 49.36.112.7, marks 42 → 92, Unauthorized because the login came after 5 failed tries from a new IP."
-- In Scene 4, after TAMPERED: show "1 line changed after locking" (Before/After), click "Restore original" → MATCH again.
-- Scene 5: click "Save report as PDF" → browser print dialog → Save as PDF.
+"Isliye humne LogLens banaya. Rules gadbad dhoondhte hain, AI samjhata hai, aur SHA-256 prove karta hai ki log ke saath chhed-chhaad hui ya nahi."
+
+---
+
+## Step 2: Sample kholo (0:30 - 0:55)
+**Screen:** Slide 4 pe aao, phir app wale tab pe jao.
+
+**Karo:** left side **"ERP marks tampering"** dabao.
+
+**Kya dikhega:**
+- Upar bada **laal box: "High risk"**.
+- Neeche **Timeline** mein events ki list. Laal wale gadbad wale events hain.
+
+**Bolo:**
+"Ek click mein log ki timeline ban gayi. Laal lines gadbad hain: raat 2 baje 5 baar galat password, phir naye IP se login, phir marks 42 se 92, phir audit log delete. Har laal line ke saath reason likha hai. Ye rules ka kaam hai, AI ka nahi."
+
+---
+
+## Step 3: Kisne kya badla (0:55 - 1:15)
+**Karo:** **"Changes made"** box dikhao. Likha hoga "6 changes, 3 unauthorized".
+
+**Ek laal "Unauthorized" card pe ungli rakho aur bolo:**
+"Yahan har badlav ki list hai: kisne, kab, kis IP se, pehle kya tha aur baad mein kya hua. Raat 2:09 baje prof.verma ke account se, IP 49.36.112.7 se, marks 42 se 92. Ye Unauthorized hai, kyunki login 5 galat password ke baad naye IP se hua tha. Matlab account chori hua tha."
+
+---
+
+## Step 4: AI se poochho (1:15 - 1:45)
+**Karo:** **"What happened"** box mein **"Analyze with AI"** dabao, 5-10 second ruko.
+
+**Kya dikhega:**
+- **"Verdict: incident"**, aur thoda text ki kya hua.
+- Har point ke saath **#14, #15** jaise number.
+- Dotted box: **"AI found beyond the rules"**.
+
+**Bolo:**
+"AI ne poori kahani bata di. Har point ke saath event number hai, to hum khud check kar sakte hain ki AI sahi bol raha hai. Is dotted box mein woh baatein hain jo rules ne nahi pakdi, sirf AI ne jodi."
+
+**Optional:** **हिंदी** dabao aur phir "Analyze with AI". Bolo: "Committee ke liye Hindi mein bhi."
+
+**Agar grey "Offline summary" box aaye:** ghabrao mat. Bolo "AI abhi slow hai, ye rules wala backup hai", aur ek baar phir dabao.
+
+---
+
+## Step 5: Chhed-chhaad pakdo aur wapas lao (1:45 - 2:30)
+**Karo:**
+1. Left side **"Log text"** box mein `42->92` dhoondho.
+2. `92` ko `93` kar do. Bas ek number.
+3. Left side **"Verify integrity"** dabao.
+
+**Kya dikhega:** laal **"TAMPERED: hash mismatch"**, aur neeche **"1 line changed after locking"**, jisme **Before** aur **After** dono dikhenge.
+
+**Bolo:**
+"Maine sirf ek number badla, aur poora hash badal gaya. App ne turant pakad liya, aur bata bhi diya kaunsi line badli."
+
+4. **"Restore original"** dabao. Hara **MATCH** aayega.
+
+**Bolo:**
+"Aur ek click mein original wapas aa gaya, kyunki lock karte waqt humne ek sealed copy rakhi thi."
+
+**Optional (time ho to):** "Audit trail" kholo aur **"Tamper test"** dabao. **"CHAIN BROKEN"** aayega. Bolo: "Hamari apni history bhi koi chupke se edit kare, to woh bhi pakda jata hai."
+
+---
+
+## Step 6: PDF report (2:30 - 2:45)
+**Karo:** left side **"Save report as PDF"** dabao. Print window khulegi, wahan **"Save as PDF"** chuno.
+
+**Bolo:**
+"Poori report PDF mein: kisne kya badla, pehle aur baad, hash, AI summary aur history. Ye committee ko de sakte hain."
+
+---
+
+## Step 7: Khatam karo (2:45 - 3:00)
+**Screen:** wapas slides pe jao, slide 6, 7 aur 8.
+
+**Bolo:**
+"Humne 16 test cases banaye. 3 baar chalaye: 16, 16 aur 15 sahi aaye. Ek baar Hindi jawab slow tha, tab backup ne kaam kiya. Ye sirf college ke liye nahi hai: kisi bhi office, server ya website ka log chalega. QR scan karo aur apna log daal ke try karo. Thank you!"
+
+---
+
+## Agar kuch galat ho jaye
+| Problem | Kya karo |
+|---|---|
+| Internet nahi chal raha | Phone ka hotspot on karo. Na chale to recorded video chalao. |
+| AI ka grey "Offline summary" aaya | "AI slow hai, ye backup hai" bolo, ek baar phir dabao. |
+| PDF window nahi khuli | "Download report (HTML)" dabao aur woh file kholo. |
+| Page ajeeb dikh raha hai | "New case" dabao, phir sample dobara dabao. |
+
+**Yaad rakhne wali ek line:** "Rules dhundhte hain, AI samjhata hai, SHA-256 prove karta hai."
+
+**Note:** demo ke saare logs made-up sample data hain. Judge pooche to seedha yahi bolo.
