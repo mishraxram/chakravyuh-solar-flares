@@ -18,15 +18,17 @@ Repo: https://github.com/mishraxram/chakravyuh-solar-flares
 - Concept chosen, PLAN / DEMO_SCRIPT / TESTSET / BACKLOG / DESIGN written
 - Scaffold: Astro + Tailwind + Pages Function (/api/health), hello-world live (Gate A)
 - Must-have 1: parser (ERP CSV + auth.log) + 9 rules + timeline + 3 sample buttons, live. Check: node scripts/check-rules.ts
+- Must-have 2: /api/analyze (Gemini lite models chain, 8s budget) + EN/Hindi + offline rule-based fallback, live. 3/3 live calls OK (5-7s).
 
 ## Doing
-- Must-have 2: AI summary
+- Must-have 3: SHA-256 evidence locker
 
 ## Next 3 actions
-1. Must-have 2: /api/analyze Gemini + offline fallback
-2. Must-have 3: SHA-256 locker + tamper verify + report
-3. Gate B demo-path check + eval-set
+1. Must-have 3: SHA-256 locker + tamper verify + report
+2. Gate B demo-path check + eval-set
+3. Polish + QR code + README
 
 ## Notes
+- Gemini: gemini-2.5-flash not available to this key; big flash models busy/slow (5-9s). Using flash-lite chain. Latency 5-8s is close to the 8s limit: fallback kicks in if slower.
 - Local functions dev: `npm run build && npx wrangler pages dev dist` (reads .dev.vars, git-ignored)
 - npm blocked esbuild postinstall script; build still works.
