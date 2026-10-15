@@ -67,6 +67,7 @@ Should show: case note at the top, marks jump flag, AI summary in Hindi.
 ## D. Resources in this repo
 | File | Use it for |
 |---|---|
+| Slide deck (7 slides, speaker notes, download as PPTX/PDF) | https://claude.ai/artifact/C3p7eQ1CCxardURKkz7Mu3 (private until you share it) |
 | docs/PITCH.md | 3-minute script, 60-second version, slide outline, 15 judge questions, Hinglish cheat-sheet |
 | docs/DEMO_SCRIPT.md | exact clicks for the live demo |
 | docs/DEFENSE.md | how the code works, hardest questions, weak spots |
