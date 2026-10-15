@@ -19,11 +19,14 @@ Task:
 3. Give a verdict: "incident" (clear attack or misuse), "suspicious" (worth checking), "normal" (looks like routine work) or "unsure" (not enough data).
    Give confidence in that verdict: "low", "medium" or "high". Use "low" if the evidence is thin.
 4. Give 2-3 concrete next steps (max 20 words each) for the investigator (what to check or collect next).
+5. List up to 3 "hidden_patterns": links between events that the rule flags do NOT already say
+   (for example: a step-by-step attack sequence, a failed attempt that explains a later action, timing that matches a cover-up).
+   Cite event numbers. Use an empty list if you find nothing new; never repeat a flag reason.
 Never claim certainty about a person's identity; say "the account" or "the IP" unless logs prove more.
 ${language}
 
 Reply ONLY with JSON in this shape:
-{"verdict": "incident"|"suspicious"|"normal"|"unsure", "summary": string, "indicators": [{"events": number[], "text": string}], "confidence": "low"|"medium"|"high", "next_steps": string[]}
+{"verdict": "incident"|"suspicious"|"normal"|"unsure", "summary": string, "indicators": [{"events": number[], "text": string}], "confidence": "low"|"medium"|"high", "next_steps": string[], "hidden_patterns": [{"events": number[], "text": string}]}
 
 Events:
 ${events.map((e) => `#${e.n} ${e.timeText} user=${e.user || '-'} role=${e.role || '-'} ip=${e.ip || '-'} ${e.action} ${e.target} ${e.detail}${e.flags.length ? ` [flags: ${e.flags.join('; ')}]` : ''}`).join('\n')}`;

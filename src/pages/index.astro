@@ -53,7 +53,8 @@ const samples = [
     </div>
     <div id="verifyOut" class="mt-3"></div>
     <details class="mt-3 text-xs">
-      <summary class="cursor-pointer text-muted">Audit trail</summary>
+      <summary class="cursor-pointer text-muted">Audit trail (hash-chained) <span id="chain" class="font-semibold"></span></summary>
+      <button id="tamperAudit" type="button" class="mt-2 underline text-muted">Tamper test: secretly edit audit entry 1</button>
       <ol id="auditList" class="font-mono mt-1 space-y-0.5"></ol>
     </details>
   </section>
@@ -84,7 +85,7 @@ const samples = [
 <script>
   import { parseLog } from '../lib/parse.ts';
   import { applyRules, ruleVerdict } from '../lib/rules.ts';
-  import { lockEvidence, verifyEvidence, getEvidence, getAudit, audit, clearCase, now } from '../lib/evidence.ts';
+  import { lockEvidence, verifyEvidence, getEvidence, getAudit, audit, clearCase, now, verifyAuditChain, tamperAuditForDemo } from '../lib/evidence.ts';
   import { buildReport } from '../lib/report.ts';
 
   const $ = (id: string) => document.getElementById(id)!;
@@ -123,14 +124,19 @@ const samples = [
   let lastAi: AiResult | null = null;
   let lastVerify: { match: boolean; current: string } | null = null;
 
-  function showLocker() {
+  async function showLocker() {
     const ev = getEvidence();
     $('locker').classList.toggle('hidden', !ev);
     if (!ev) return;
     $('evName').textContent = `${ev.name} · ${ev.size} bytes · locked ${ev.lockedAt}`;
     $('evHash').textContent = ev.hash;
     const list = $('auditList'); list.replaceChildren();
-    getAudit().forEach((a) => list.append(el('li', '', `${a.at}  ${a.action}  ${a.detail}`)));
+    getAudit().forEach((a, i) => list.append(el('li', '', `${i + 1}. ${a.at}  ${a.action}  ${a.detail}  [${a.hash.slice(0, 10)}…]`)));
+    const broken = await verifyAuditChain();
+    const chain = $('chain');
+    chain.textContent = broken ? `· CHAIN BROKEN at entry ${broken}` : `· chain OK (${getAudit().length} entries)`;
+    chain.className = broken ? 'font-semibold text-flag' : 'font-semibold text-match';
+    if (broken) ($('chain').parentElement!.parentElement as HTMLDetailsElement).open = true;
   }
 
   $('verify').addEventListener('click', async () => {
@@ -147,9 +153,11 @@ const samples = [
     showLocker();
   });
 
-  $('report').addEventListener('click', () => {
-    audit('REPORT_DOWNLOADED', 'HTML report generated');
-    const html = buildReport({ evidence: getEvidence(), verify: lastVerify, events: last?.events ?? [], notes: last?.notes ?? [], ai: lastAi, audit: getAudit(), generatedAt: now() });
+  $('tamperAudit').addEventListener('click', () => { tamperAuditForDemo(); showLocker(); });
+
+  $('report').addEventListener('click', async () => {
+    await audit('REPORT_DOWNLOADED', 'HTML report generated');
+    const html = buildReport({ evidence: getEvidence(), verify: lastVerify, events: last?.events ?? [], notes: last?.notes ?? [], ai: lastAi, audit: getAudit(), chainBrokenAt: await verifyAuditChain(), generatedAt: now() });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob([html], { type: 'text/html' }));
     a.download = `loglens-report-${getEvidence()?.hash.slice(0, 8) ?? 'case'}.html`;
@@ -172,7 +180,7 @@ const samples = [
   // Last parsed result, reused by the AI step
   let last: ReturnType<typeof parseLog> | null = null;
 
-  type AiResult = { source: string; verdict: string; model?: string; summary: string; indicators: { events: number[]; text: string }[]; confidence: string; next_steps: string[] };
+  type AiResult = { source: string; verdict: string; hidden_patterns?: { events: number[]; text: string }[]; model?: string; summary: string; indicators: { events: number[]; text: string }[]; confidence: string; next_steps: string[] };
 
   // Ask the server (which asks Gemini). On any failure, fall back to a summary built from the rules.
   async function analyze() {
@@ -196,7 +204,7 @@ const samples = [
     }
     btn.disabled = false;
     lastAi = result;
-    audit(result.source === 'ai' ? 'AI_SUMMARY' : 'OFFLINE_SUMMARY', `${result.model ?? 'rules'} · confidence ${result.confidence} · ${lang}`);
+    await audit(result.source === 'ai' ? 'AI_SUMMARY' : 'OFFLINE_SUMMARY', `${result.model ?? 'rules'} · confidence ${result.confidence} · ${lang}`);
     showLocker();
     showAi(result);
   }
@@ -217,6 +225,7 @@ const samples = [
       summary: flagged.length ? `Rules flagged ${flagged.length} of ${last!.events.length} events. Review the indicators below.` : 'Rules found nothing suspicious.',
       indicators: groups.slice(0, 6).map((g) => ({ events: g.ns, text: g.text })),
       confidence: flagged.length >= 3 ? 'medium' : 'low',
+      hidden_patterns: [],
       next_steps: ['Retry the AI summary in a minute.', 'Collect server auth logs and database audit logs for the same time window.'],
     };
   }
@@ -239,7 +248,15 @@ const samples = [
       li.append(el('span', 'font-mono font-semibold mr-2', i.events.map((n) => `#${n}`).join(' ')), document.createTextNode(i.text));
       ul.append(li);
     });
-    out.append(ul, el('p', 'text-sm font-semibold', 'Next steps'));
+    out.append(ul);
+    // What the AI found that the rules did not say (the "AI-based pattern discovery" part)
+    if (r.hidden_patterns?.length) {
+      const box = el('div', 'mb-3 p-3 rounded border-2 border-dashed border-tag');
+      box.append(el('p', 'text-sm font-semibold mb-1', 'AI found beyond the rules'));
+      r.hidden_patterns.forEach((h) => { const p = el('p', 'text-sm'); p.append(el('span', 'font-mono font-semibold mr-2', h.events.map((n) => `#${n}`).join(' ')), document.createTextNode(h.text)); box.append(p); });
+      out.append(box);
+    }
+    out.append(el('p', 'text-sm font-semibold', 'Next steps'));
     const steps = el('ol', 'list-decimal pl-5 text-sm');
     r.next_steps.forEach((s) => steps.append(el('li', '', s)));
     out.append(steps);
@@ -295,7 +312,7 @@ const samples = [
       list.append(d);
     }
     $('result').classList.remove('hidden');
-    audit('TIMELINE_BUILT', `${events.length} events · ${v.high} high · ${v.medium} medium · ${parsed.unparsed.length} not understood`);
+    await audit('TIMELINE_BUILT', `${events.length} events · ${v.high} high · ${v.medium} medium · ${parsed.unparsed.length} not understood`);
     showLocker();
   }
 </script>

@@ -51,9 +51,11 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
 
       // 3. Keep only indicators that cite real event numbers (guards against made-up events)
       const valid = new Set(events.map((e) => e.n));
-      ai.indicators = (ai.indicators ?? []).filter(
+      const cited = (list: any) => (Array.isArray(list) ? list : []).filter(
         (i: any) => Array.isArray(i.events) && i.events.length && i.events.every((n: number) => valid.has(n)),
       );
+      ai.indicators = cited(ai.indicators);
+      ai.hidden_patterns = cited(ai.hidden_patterns).slice(0, 3);
       return Response.json({ source: 'ai', model, sent: events.length, ...ai });
     } catch (err) {
       lastError = err instanceof Error && err.name === 'TimeoutError' ? 'AI took longer than 8s' : 'AI reply could not be read';

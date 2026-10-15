@@ -2,16 +2,16 @@
 import type { LogEvent } from './parse.ts';
 import type { Evidence, AuditEntry } from './evidence.ts';
 
-type Ai = { source: string; verdict: string; model?: string; summary: string; indicators: { events: number[]; text: string }[]; confidence: string; next_steps: string[] } | null;
+type Ai = { source: string; verdict: string; hidden_patterns?: { events: number[]; text: string }[]; model?: string; summary: string; indicators: { events: number[]; text: string }[]; confidence: string; next_steps: string[] } | null;
 
 // Escape everything that came from the log or the AI
 const esc = (s: unknown) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
 
 export function buildReport(opts: {
   evidence: Evidence | null; verify: { match: boolean; current: string } | null;
-  events: LogEvent[]; notes: string[]; ai: Ai; audit: AuditEntry[]; generatedAt: string;
+  events: LogEvent[]; notes: string[]; ai: Ai; audit: AuditEntry[]; chainBrokenAt: number; generatedAt: string;
 }) {
-  const { evidence, verify, events, notes, ai, audit, generatedAt } = opts;
+  const { evidence, verify, events, notes, ai, audit, chainBrokenAt, generatedAt } = opts;
   const flagged = events.filter((e) => e.flags.length);
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>LogLens investigation report</title>
 <style>body{font-family:system-ui,"Noto Sans Devanagari",sans-serif;max-width:900px;margin:24px auto;padding:0 16px;color:#14161A}
@@ -32,10 +32,12 @@ ${flagged.map((e) => `<tr><td>${e.n}</td><td class="m">${esc(e.timeText)}</td><t
 ${ai ? `<p><em>${ai.source === 'ai' ? `AI generated (Gemini ${esc(ai.model)}). Verify against cited events.` : 'Offline summary from rules (not AI).'}</em></p>
 <p>${esc(ai.summary)}</p><p><strong>Verdict: ${esc(ai.verdict)}</strong> · confidence ${esc(ai.confidence)}</p>
 <ul>${ai.indicators.map((i) => `<li><code>${i.events.map((n) => '#' + n).join(' ')}</code> ${esc(i.text)}</li>`).join('')}</ul>
+${ai.hidden_patterns?.length ? `<p><strong>AI found beyond the rules:</strong></p><ul>${ai.hidden_patterns.map((i) => `<li><code>${i.events.map((n) => '#' + n).join(' ')}</code> ${esc(i.text)}</li>`).join('')}</ul>` : ''}
 <p>Next steps:</p><ol>${ai.next_steps.map((s) => `<li>${esc(s)}</li>`).join('')}</ol>` : '<p>AI summary not run.</p>'}
-<h2>Audit trail</h2>
-<table><tr><th>Time</th><th>Action</th><th>Detail</th></tr>
-${audit.map((a) => `<tr><td class="m">${esc(a.at)}</td><td class="m">${esc(a.action)}</td><td class="m">${esc(a.detail)}</td></tr>`).join('')}
+<h2>Audit trail (hash-chained)</h2>
+<p>Chain check: ${chainBrokenAt ? `<span class="bad">BROKEN at entry ${chainBrokenAt}: the audit trail was edited</span>` : `<span class="ok">OK: ${audit.length} entries, each hash links to the one before</span>`}</p>
+<table><tr><th>#</th><th>Time</th><th>Action</th><th>Detail</th><th>Entry hash</th></tr>
+${audit.map((a, i) => `<tr><td>${i + 1}</td><td class="m">${esc(a.at)}</td><td class="m">${esc(a.action)}</td><td class="m">${esc(a.detail)}</td><td class="m">${esc(a.hash.slice(0, 16))}…</td></tr>`).join('')}
 </table>
 <h2>Full timeline</h2>
 <table>${events.map((e) => `<tr><td>${e.n}</td><td class="m">${esc(e.raw)}</td></tr>`).join('')}</table>

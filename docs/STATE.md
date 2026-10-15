@@ -21,13 +21,14 @@ Repo: https://github.com/mishraxram/chakravyuh-solar-flares
 - Must-have 2: /api/analyze (Gemini lite models chain, 8s budget) + EN/Hindi + offline rule-based fallback, live. 3/3 live calls OK (5-7s).
 - Must-have 3: SHA-256 evidence tag (matches sha256sum), verify MATCH/TAMPERED, audit trail (localStorage), HTML report download, live.
 - Eval: 14/14 x3 runs after fixes (verdict field, impossible-travel rule, Hindi retry)
+- judge-me (~73/100) fixes: AI "beyond the rules" hidden_patterns; hash-chained audit trail + tamper test button (e2e: OK -> BROKEN at entry 1)
 
 ## Doing
-- judge-me review
+- Polish (QR, touch targets, any-file hashing, README)
 
 ## Next 3 actions
-1. judge-me + top 2 fixes
-2. Polish: QR code, mobile touch targets, README AI usage
+1. Polish: QR code, 44px targets, 16px text
+2. Any-file evidence hashing (bytes + metadata), Apache log parser if time
 3. Polish + QR code + README AI usage
 
 ## Notes
