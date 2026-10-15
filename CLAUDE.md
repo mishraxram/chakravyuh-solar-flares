@@ -13,6 +13,7 @@ Priority order: 1) a working live demo  2) the 3 must-have features  3) polish. 
 - Before touching more than 3 files or changing architecture: write a 5-line plan and wait for "go".
 - Prove it works: run the build, tests or dev server and read the real output. Never say "done" without evidence.
 - After every green slice: git add -A, git commit -m "<slice name>", and show the commit hash.
+- After EVERY git commit, also run `git push origin main`. Never use force push.
 - Prefer boring, readable code with short plain-English comments.
 - No fake data presented as real. Sample data must be labelled "sample". No invented metrics, testimonials or API responses.
 - Never hardcode keys. Secrets live only in .env (git-ignored) or Cloudflare secrets. Never print or commit them.
