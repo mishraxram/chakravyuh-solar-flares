@@ -17,7 +17,7 @@ Judges English pasand karein to English lines `docs/PITCH.md` mein hain. Neeche 
 ---
 
 ## Step 1: Problem batao (0:00 - 0:30)
-**Screen:** Slide 1, 2 aur 3.
+**Screen:** Slide 1, 2, 3 aur 4 (cover, problem, "Today vs with LogLens", 3 steps).
 
 **Bolo:**
 "Result week hai. Ek subah student ke DBMS marks 42 se 92 ho gaye. Professor bolte hain: maine raat ko login hi nahi kiya. IT team ke paas hazaron log lines hain. Sawaal ye hai: kisne kiya, aur kya hum in logs pe bharosa kar sakte hain?"
@@ -27,7 +27,7 @@ Judges English pasand karein to English lines `docs/PITCH.md` mein hain. Neeche 
 ---
 
 ## Step 2: Sample kholo (0:30 - 0:55)
-**Screen:** Slide 4 pe aao, phir app wale tab pe jao.
+**Screen:** Slide 5 (Live demo, QR wala) pe aao, phir app wale tab pe jao.
 
 **Karo:** left side **"ERP marks tampering"** dabao.
 
@@ -94,7 +94,7 @@ Judges English pasand karein to English lines `docs/PITCH.md` mein hain. Neeche 
 ---
 
 ## Step 7: Khatam karo (2:45 - 3:00)
-**Screen:** wapas slides pe jao, slide 6, 7 aur 8.
+**Screen:** wapas slides pe jao: slide 6 (kisne kya badla), 7 (kaise kaam karta hai), 8 (testing), 9 (thank you).
 
 **Bolo:**
 "Humne 16 test cases banaye. 3 baar chalaye: 16, 16 aur 15 sahi aaye. Ek baar Hindi jawab slow tha, tab backup ne kaam kiya. Ye sirf college ke liye nahi hai: kisi bhi office, server ya website ka log chalega. QR scan karo aur apna log daal ke try karo. Thank you!"
