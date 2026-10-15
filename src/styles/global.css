@@ -1,0 +1,15 @@
+@import "tailwindcss";
+
+/* Design tokens from docs/DESIGN.md */
+@theme {
+  --color-ink: #14161A;
+  --color-paper: #F4F1EA;
+  --color-tag: #E0A526;
+  --color-flag: #C2362B;
+  --color-match: #2F7D4F;
+  --color-muted: #6B6F76;
+  --font-sans: "IBM Plex Sans", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+
+body { background: var(--color-paper); color: var(--color-ink); }

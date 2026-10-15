@@ -28,14 +28,14 @@ Multi-case dashboard, YARA rules, file metadata (EXIF), PDF export, login/roles,
 - SAMPLE (labelled "sample"): 3 log files in `public/samples/` that we write ourselves; offline fallback summary.
 - Needs key: `GEMINI_API_KEY` in `.env` (local) and Cloudflare secret (live). Only parsed event lines (max ~200) go to Gemini; UI says so.
 
-## Timeline (T+0 = 2026-10-15 11:58 IST, assumed — change if event start differs)
+## Timeline (T+0 = 2026-10-15 12:09 IST, 4-hour target set by user)
 | Gate | T | Clock |
 |---|---|---|
-| A: hello-world live | T+2:00 | 13:58 |
-| B: full demo path | T+4:00 | 15:58 |
-| C: feature freeze | T+5:30 | 17:28 |
-| Submission ready | T+7:00 | 18:58 |
-| Submit (30 min buffer) | T+7:30 | 19:28 |
+| A: hello-world live | T+0:40 | 12:50 |
+| B: full demo path | T+2:20 | 14:30 |
+| C: feature freeze | T+3:05 | 15:15 |
+| Ready to submit | T+3:40 | 15:50 |
+| Hard deadline | T+4:00 | 16:09 |
 
 ## Top 5 risks -> fallback
 1. Gemini key/quota fails live -> labelled offline sample summary, rules still work.
