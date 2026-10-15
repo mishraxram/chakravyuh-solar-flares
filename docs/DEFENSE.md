@@ -43,7 +43,7 @@
 10. **What does "verdict" vs "confidence" mean?** Verdict = what happened (incident/suspicious/normal/unsure). Confidence = how sure the AI is about that verdict. We split them after the test set showed "high" was confusing on normal logs.
 
 ## 5 weak spots (honest answers)
-1. **Only 2 log formats.** "Limitation. Next we add Apache/Nginx access logs and Windows event logs; the parser is built so a new format is one function."
+1. **Only 3 log formats.** "Limitation. Next we add Windows event logs and firewall logs; the parser is built so a new format is one function."
 2. **Audit trail is in one browser.** "Editing is detected, but deleting the whole trail is not. Next: send each entry hash to a server or a timestamp service as a receipt."
 3. **Rules use fixed numbers (5 fails in 2 min, 06:00-23:00).** "They fit our college story. Next: make them settings per organisation."
 4. **Test set is small and written by us.** "14 cases show the demo path is stable, not real-world accuracy. Next: test on public log datasets."

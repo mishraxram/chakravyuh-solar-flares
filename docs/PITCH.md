@@ -57,7 +57,7 @@ Live: https://loglens-solarflares.pages.dev (QR on every page footer)
 12. **Business or impact model?** Free tool for colleges and small offices. Possible paid version: saved cases, team sharing, server-side hash receipts.
 13. **Is the report legal evidence?** No. It supports an investigation. A court process needs proper chain of custody; we say this in the report.
 14. **Why Hindi?** Inquiry committees in colleges are often non-technical. A Hindi summary helps them understand the case.
-15. **What formats work?** ERP audit CSV and Linux auth.log for timelines. Any file (PDF, image) can be hashed and verified.
+15. **What formats work?** ERP audit CSV, Linux auth.log and Apache/Nginx access logs for timelines. Any file (PDF, image) can be hashed and verified.
 
 ## 4. Backup plan
 - Record the demo screen twice now (90 seconds each, no editing). Keep both on the laptop and on a phone.
