@@ -9,7 +9,7 @@ Repo: https://github.com/mishraxram/chakravyuh-solar-flares
 | Gate | Time | Deadline | Status |
 |---|---|---|---|
 | A live hello-world | T+0:40 | 12:50 | DONE 12:13 |
-| B full demo path | T+2:20 | 14:30 | pending |
+| B full demo path | T+2:20 | 14:30 | DONE 12:27 (headless Chrome e2e on live: timeline, Hindi AI, MATCH->TAMPERED, report) |
 | C feature freeze | T+3:05 | 15:15 | pending |
 | Ready | T+3:40 | 15:50 | pending |
 
@@ -19,14 +19,15 @@ Repo: https://github.com/mishraxram/chakravyuh-solar-flares
 - Scaffold: Astro + Tailwind + Pages Function (/api/health), hello-world live (Gate A)
 - Must-have 1: parser (ERP CSV + auth.log) + 9 rules + timeline + 3 sample buttons, live. Check: node scripts/check-rules.ts
 - Must-have 2: /api/analyze (Gemini lite models chain, 8s budget) + EN/Hindi + offline rule-based fallback, live. 3/3 live calls OK (5-7s).
+- Must-have 3: SHA-256 evidence tag (matches sha256sum), verify MATCH/TAMPERED, audit trail (localStorage), HTML report download, live.
 
 ## Doing
-- Must-have 3: SHA-256 evidence locker
+- Gate B reached: eval-set, judge-me
 
 ## Next 3 actions
-1. Must-have 3: SHA-256 locker + tamper verify + report
-2. Gate B demo-path check + eval-set
-3. Polish + QR code + README
+1. eval-set on docs/TESTSET.md
+2. judge-me + top 2 fixes
+3. Polish + QR code + README AI usage
 
 ## Notes
 - Gemini: gemini-2.5-flash not available to this key; big flash models busy/slow (5-9s). Using flash-lite chain. Latency 5-8s is close to the 8s limit: fallback kicks in if slower.
