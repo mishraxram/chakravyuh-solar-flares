@@ -77,10 +77,10 @@ Slash commands (/ps-decode etc.) still work if he types them.
 ## Project block
 - NAME: LogLens (team SOLAR FLARES, HK26-0014)
 - PROBLEM + TARGET USER: ABCS-02 AI-Assisted Digital Forensics. College IT / cyber cell investigators who need a log timeline, AI summary and SHA-256 evidence proof. See docs/PROBLEM.md.
-- HACKATHON + THEME: CHAKRAVYUH 1.0, BIET Lucknow. Domain 3: AI-Based Cybersecurity.
-- JUDGING CRITERIA: not received yet (user will send). Until then, map features to the 6 expected solution points in docs/PROBLEM.md.
-- CONSTRAINTS: 3-minute demo. No new major features in this pass.
-- DEMO DATE: 22 Oct 2026
+- HACKATHON + THEME: अvinya '26 Hackathon 4.0, Dept. of CSE (AIML), BIET Lucknow (v1 was built for CHAKRAVYUH 1.0). Domain: Cybersecurity / AI-ML. Details in docs/RESEARCH.md.
+- JUDGING CRITERIA (official, no weights): Innovation, Problem Relevance, Technical Implementation, Prototype Quality, Feasibility, Impact, Presentation.
+- CONSTRAINTS: Round 1 idea submission by 18 Oct 2026 12:00 IST. Team 1-5. Must explain stack and implementation. Original work.
+- DEMO DATE: kick-off 22 Oct 2026 10:00, judging 23 Oct 2026 09:30. Feature freeze 20 Oct 23:59.
 
 ## Upgrade-pass rules (from the user)
 - Work on branch `upgrade` (safety tag `pre-upgrade-v1`). Push the branch after each commit. Merge to main only after the live URL is verified.

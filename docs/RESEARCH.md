@@ -1,6 +1,13 @@
 # RESEARCH (v2, 2026-10-16)
 
-Rubric status: **not received yet.** Until it arrives we rank against a proxy rubric (below) built from the PS expected-solution points and public hackathon rubrics. Re-rank when the real one comes.
+## Event (verified 2026-10-16 from the event site + Unstop page)
+- **अvinya '26 Hackathon 4.0**, Dept. of CSE (AIML), BIET Lucknow. Offline at BIET. Sources: https://github.com/virtual-atharvv/Avinya26 (index.html), https://unstop.com/p/avinya26-bansal-institute-of-engineering-and-technology-1764266
+- **Round 1: Idea Submission & Shortlisting, deadline 18 Oct 2026, 12:00 PM IST** ("Teams are required to submit their innovative project ideas for evaluation"). Submission format is not stated on the page.
+- Event schedule (tentative): Day 1, 22 Oct 10:00 "Hackathon Kick-off, 6-hour sprint begins". Day 2, **23 Oct 09:30 "Hackathon: Submission & Judging, prototype demos"**.
+- Domains include Cybersecurity and AI/ML. Team size 1-6 (the description says "up to 5"). Registration fee 149.
+- Key guidelines (quoted): "Work on the official problem statements/domains provided by the organizers." "Submissions must demonstrate original work and meaningful contribution by the participants." "AI-assisted development tools may be used subject to the hackathon guidelines." "Teams must be able to explain their solution, technology stack, implementation, and prototype during evaluation."
+- **Evaluation (quoted, no weights given):** "Innovation, Problem Relevance, Technical Implementation, Prototype Quality, Feasibility, Impact, and Presentation." We treat these as equal weight (1/7 each) until told otherwise.
+- **Open risk:** a "6-hour sprint" on 22 Oct suggests on-site building. It is not stated whether a project built before the event may be shown. Ask the organizers (WhatsApp community) before relying on it.
 
 ## Comparable projects / sources
 1. **SANS "Find Evil!" AI forensics hackathon 2026**, winner "Mulder" (autonomous forensic investigator: plan, run tools, analyze, *challenge its own conclusions*, report). 90 incident responders judged on **accuracy, safeguards, audit trails, and the agent's ability to recognize and correct its own errors**. 123 of 291 entries met the technical and documentation bar. Sources: [GovInfoSecurity](https://www.govinfosecurity.com/cyber-novice-takes-top-prize-in-sans-ai-forensics-contest-a-32662), [SANS](https://www.sans.org/go/find-evil-hackathon-winners)
@@ -31,11 +38,5 @@ Rubric status: **not received yet.** Until it arrives we rank against a proxy ru
 **"Evidence you don't have to trust us on."** On lock, the server issues a **signed evidence receipt** (Ed25519 signature over hash + time + size). The public key is on the page, so anyone can verify the receipt, even offline, and an insider who edits the log and re-hashes it cannot forge the signature. On top of that, an **AI cross-check** flags every place where the AI and the deterministic rules disagree.
 Why: it directly answers the top Find Evil criteria (safeguards, self-correction, audit) and the published hashing weakness. It builds on v1's strongest part (integrity) instead of adding another chatbot.
 
-## Proxy rubric (until the real one arrives)
-| Criterion | Proxy weight |
-|---|---|
-| Technical depth | 30% |
-| Problem fit (PS points 1-6) | 25% |
-| Working demo / UX | 20% |
-| Innovation | 15% |
-| Presentation | 10% |
+## Rubric used for ranking
+The 7 official criteria above, equal weight (no weights published).
