@@ -1,0 +1,21 @@
+# SAMPLE DATA (made up for demo): college ERP audit log export
+time,user,role,ip,action,target,detail
+2026-10-13 09:12:04,prof.verma,faculty,10.0.4.21,LOGIN,erp,success
+2026-10-13 09:20:31,prof.verma,faculty,10.0.4.21,UPDATE,marks/21CS045/DBMS,38->42
+2026-10-13 09:24:10,prof.verma,faculty,10.0.4.21,UPDATE,marks/21CS046/DBMS,51->55
+2026-10-13 10:02:11,21cs045,student,10.0.7.88,LOGIN,erp,success
+2026-10-13 10:05:40,21cs045,student,10.0.7.88,VIEW,marks/21CS045,
+2026-10-13 17:45:00,prof.verma,faculty,10.0.4.21,LOGOUT,erp,
+2026-10-14 01:52:30,21cs045,student,49.36.112.7,LOGIN,erp,success
+2026-10-14 01:55:10,21cs045,student,49.36.112.7,UPDATE,marks/21CS045/DBMS,DENIED: no permission
+2026-10-14 01:58:02,prof.verma,faculty,49.36.112.7,LOGIN_FAIL,erp,wrong password
+2026-10-14 01:58:19,prof.verma,faculty,49.36.112.7,LOGIN_FAIL,erp,wrong password
+2026-10-14 01:58:37,prof.verma,faculty,49.36.112.7,LOGIN_FAIL,erp,wrong password
+2026-10-14 01:58:50,prof.verma,faculty,49.36.112.7,LOGIN_FAIL,erp,wrong password
+2026-10-14 01:59:04,prof.verma,faculty,49.36.112.7,LOGIN_FAIL,erp,wrong password
+2026-10-14 02:07:15,prof.verma,faculty,49.36.112.7,LOGIN,erp,success
+2026-10-14 02:09:40,prof.verma,faculty,49.36.112.7,UPDATE,marks/21CS045/DBMS,42->92
+2026-10-14 02:10:05,prof.verma,faculty,49.36.112.7,UPDATE,marks/21CS045/OS,35->88
+2026-10-14 02:12:30,prof.verma,faculty,49.36.112.7,DELETE,audit_log,rows 1-40
+2026-10-14 02:13:01,prof.verma,faculty,49.36.112.7,LOGOUT,erp,
+2026-10-14 09:05:12,prof.verma,faculty,10.0.4.21,LOGIN,erp,success

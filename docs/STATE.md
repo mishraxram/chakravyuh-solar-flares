@@ -17,14 +17,15 @@ Repo: https://github.com/mishraxram/chakravyuh-solar-flares
 - Repo safety check, README with team + reg ID, pushed to GitHub
 - Concept chosen, PLAN / DEMO_SCRIPT / TESTSET / BACKLOG / DESIGN written
 - Scaffold: Astro + Tailwind + Pages Function (/api/health), hello-world live (Gate A)
+- Must-have 1: parser (ERP CSV + auth.log) + 9 rules + timeline + 3 sample buttons, live. Check: node scripts/check-rules.ts
 
 ## Doing
-- Must-have 1: parser + rules + timeline
+- Must-have 2: AI summary
 
 ## Next 3 actions
-1. Must-have 1: parser + rules + timeline + 3 sample buttons
-2. Must-have 2: /api/analyze Gemini + offline fallback
-3. Must-have 3: SHA-256 locker + tamper verify + report
+1. Must-have 2: /api/analyze Gemini + offline fallback
+2. Must-have 3: SHA-256 locker + tamper verify + report
+3. Gate B demo-path check + eval-set
 
 ## Notes
 - Local functions dev: `npm run build && npx wrangler pages dev dist` (reads .dev.vars, git-ignored)

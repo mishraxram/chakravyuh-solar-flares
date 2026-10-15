@@ -1,11 +1,135 @@
 ---
 import Base from '../layouts/Base.astro';
+
+// The 3 "Try sample" buttons (files live in public/samples, all made-up sample data)
+const samples = [
+  { file: '/samples/erp-marks-tamper.csv', label: 'ERP marks tampering' },
+  { file: '/samples/ssh-bruteforce.log', label: 'Server SSH brute force' },
+  { file: '/samples/hinglish-case.csv', label: 'Hinglish case note' },
+];
 ---
 <Base>
-  <header class="flex items-center gap-3 mb-6">
+  <header class="flex items-center gap-3 mb-2">
     <span class="font-mono text-xs bg-tag text-ink px-2 py-1 rounded-sm">EVIDENCE</span>
     <h1 class="text-2xl font-bold">LogLens</h1>
   </header>
-  <p class="text-lg mb-4">Paste a server or ERP log. Get a red-flagged incident timeline, an AI summary, and SHA-256 proof the evidence was not changed.</p>
-  <p class="font-mono text-sm text-muted">Tool loading… (scaffold)</p>
+  <p class="mb-5 text-ink/80">Paste a server or ERP log. Get a red-flagged incident timeline, an AI summary, and SHA-256 proof the evidence was not changed.</p>
+
+  <!-- Input -->
+  <section class="bg-white border border-ink/15 rounded-md p-4 mb-6">
+    <div class="flex flex-wrap gap-2 mb-3">
+      <span class="text-sm text-muted self-center">Try sample:</span>
+      {samples.map((s) => (
+        <button type="button" data-sample={s.file} class="sample-btn text-sm border border-ink/30 rounded px-3 py-1.5 hover:bg-tag/30">
+          {s.label}
+        </button>
+      ))}
+    </div>
+    <textarea id="log" rows="9" spellcheck="false"
+      class="w-full font-mono text-xs border border-ink/20 rounded p-2 bg-paper/50"
+      placeholder="Paste ERP audit CSV (time,user,role,ip,action,target,detail) or Linux auth.log lines here. Lines starting with # are case notes."></textarea>
+    <div class="flex flex-wrap items-center gap-3 mt-3">
+      <label class="text-sm border border-ink/30 rounded px-3 py-1.5 cursor-pointer hover:bg-tag/30">
+        Upload log file <input id="file" type="file" accept=".log,.csv,.txt" class="hidden" />
+      </label>
+      <button id="run" type="button" class="bg-ink text-paper font-semibold rounded px-4 py-2">Build timeline</button>
+      <span id="msg" class="text-sm text-muted"></span>
+    </div>
+  </section>
+
+  <!-- Result -->
+  <section id="result" class="hidden">
+    <div id="notes" class="mb-3"></div>
+    <div id="verdict" class="rounded-md p-3 mb-3 font-semibold"></div>
+    <p id="stats" class="text-sm text-muted mb-2 font-mono"></p>
+    <label class="text-sm flex items-center gap-2 mb-2"><input id="onlyFlags" type="checkbox" /> Show only flagged events</label>
+    <ol id="timeline" class="space-y-1.5"></ol>
+  </section>
 </Base>
+
+<script>
+  import { parseLog } from '../lib/parse.ts';
+  import { applyRules, ruleVerdict } from '../lib/rules.ts';
+
+  const $ = (id: string) => document.getElementById(id)!;
+  const logBox = $('log') as HTMLTextAreaElement;
+  const msg = $('msg');
+
+  // Small helper: create an element with classes and safe text (no innerHTML = no XSS)
+  function el(tag: string, cls: string, text = '') {
+    const n = document.createElement(tag);
+    n.className = cls;
+    n.textContent = text;
+    return n;
+  }
+
+  // Sample buttons: load the file into the box and run
+  document.querySelectorAll<HTMLButtonElement>('.sample-btn').forEach((b) =>
+    b.addEventListener('click', async () => {
+      const res = await fetch(b.dataset.sample!);
+      logBox.value = await res.text();
+      run();
+    }),
+  );
+
+  // File upload: read text in the browser
+  ($('file') as HTMLInputElement).addEventListener('change', async (ev) => {
+    const f = (ev.target as HTMLInputElement).files?.[0];
+    if (!f) return;
+    if (f.size > 2_000_000) { msg.textContent = 'File too big (max 2 MB).'; return; }
+    logBox.value = await f.text();
+    run();
+  });
+
+  $('run').addEventListener('click', run);
+  $('onlyFlags').addEventListener('change', run);
+
+  function run() {
+    const text = logBox.value;
+    if (!text.trim()) { msg.textContent = 'Paste a log or try a sample.'; $('result').classList.add('hidden'); return; }
+    msg.textContent = '';
+    const parsed = parseLog(text);
+    const events = applyRules(parsed.events);
+    const v = ruleVerdict(events);
+
+    // Case notes (# lines)
+    const notes = $('notes'); notes.replaceChildren();
+    parsed.notes.forEach((n) => notes.append(el('p', 'text-sm italic text-ink/80 border-l-4 border-tag pl-2 mb-1', n)));
+
+    // Verdict
+    const verdict = $('verdict');
+    if (events.length === 0) {
+      verdict.className = 'rounded-md p-3 mb-3 font-semibold bg-ink/10';
+      verdict.textContent = 'Not a supported log. Use ERP audit CSV or Linux auth.log, or try a sample.';
+    } else if (v.level === 'none') {
+      verdict.className = 'rounded-md p-3 mb-3 font-semibold bg-match/15 text-match';
+      verdict.textContent = 'No suspicious pattern found by the rules. (Rules can miss things: run the AI summary or check more logs.)';
+    } else {
+      verdict.className = `rounded-md p-3 mb-3 font-semibold ${v.level === 'high' ? 'bg-flag text-white' : 'bg-tag/40'}`;
+      verdict.textContent = `${v.level.toUpperCase()} RISK: ${v.high} high-risk and ${v.medium} medium-risk events flagged by rules`;
+    }
+    $('stats').textContent = `${events.length} events parsed · ${parsed.unparsed.length} lines not understood · sorted by time`;
+
+    // Timeline
+    const list = $('timeline'); list.replaceChildren();
+    const onlyFlags = ($('onlyFlags') as HTMLInputElement).checked;
+    for (const e of events) {
+      if (onlyFlags && !e.flags.length) continue;
+      const high = e.flags.some((f) => f.severity === 'high');
+      const li = el('li', `rounded border p-2 text-sm ${high ? 'border-flag bg-flag/10' : e.flags.length ? 'border-tag bg-tag/15' : 'border-ink/10 bg-white'}`);
+      const top = el('div', 'flex flex-wrap gap-x-3 font-mono text-xs');
+      top.append(el('span', 'font-semibold', `#${e.n}`), el('span', '', e.timeText), el('span', 'font-semibold', e.user || '-'),
+        el('span', 'text-muted', e.role), el('span', '', e.ip), el('span', 'font-semibold', e.action), el('span', 'text-ink/70', `${e.target} ${e.detail}`));
+      li.append(top);
+      for (const f of e.flags) li.append(el('p', `mt-1 ${f.severity === 'high' ? 'text-flag font-semibold' : 'text-ink/80'}`, `⚑ ${f.reason}`));
+      list.append(li);
+    }
+    if (parsed.unparsed.length) {
+      const d = el('details', 'mt-3 text-xs');
+      d.append(el('summary', 'cursor-pointer text-muted', `${parsed.unparsed.length} lines not understood (kept, not dropped)`));
+      parsed.unparsed.slice(0, 50).forEach((u) => d.append(el('pre', 'font-mono whitespace-pre-wrap', u)));
+      list.append(d);
+    }
+    $('result').classList.remove('hidden');
+  }
+</script>

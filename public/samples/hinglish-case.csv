@@ -1,0 +1,8 @@
+# SAMPLE DATA (made up for demo)
+# Case note: kal raat 2 baje DBMS ke marks change hue. Prof. Verma bol rahe hain unhone raat ko login hi nahi kiya. Kisne kiya?
+2026-10-13 09:12:04,prof.verma,faculty,10.0.4.21,LOGIN,erp,success
+2026-10-13 17:45:00,prof.verma,faculty,10.0.4.21,LOGOUT,erp,
+2026-10-14 02:07:15,prof.verma,faculty,49.36.112.7,LOGIN,erp,success
+2026-10-14 02:09:40,prof.verma,faculty,49.36.112.7,UPDATE,marks/21CS045/DBMS,42->92
+2026-10-14 02:12:30,prof.verma,faculty,49.36.112.7,DELETE,audit_log,rows 1-40
+2026-10-14 01:52:30,21cs045,student,49.36.112.7,LOGIN,erp,success
