@@ -34,7 +34,7 @@ Open http://localhost:8788. Without a key, everything works except the AI summar
 - **In the product:** Google Gemini (flash-lite models, with backups if one is busy) is called from a Cloudflare Pages Function (`functions/api/analyze.ts`). The key stays on the server. The prompt is in `src/lib/prompts.ts`.
 - **What is sent:** only the parsed event lines (max 200, flagged ones first) and the case notes. Raw uploaded files and hashes stay in the browser. The audit trail and evidence record are kept in the browser's localStorage.
 - **Checks on AI output:** indicators that cite event numbers not in the log are removed. If Hindi is asked and the reply is not in Hindi, the next model is tried.
-- **Building it:** made with Claude Code (scaffolding and UI). Problem framing, scope, prompt design and the test set are ours.
+- **Building it:** Built with Claude Code (code, UI, rules and test cases, written under our direction and reviewed by us) and Google Gemini API (analysis inside the app). Problem choice, story, scope, demo design and testing decisions are ours.
 
 ## Limits (honest)
 - Supports 2 log formats (ERP audit CSV, Linux auth.log). Other formats show "Not a supported log".
