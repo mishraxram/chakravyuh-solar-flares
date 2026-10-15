@@ -1,4 +1,4 @@
-# SOLAR FLARES
+# SOLAR FLARES( HK26-0014 )
 
 **Team:** SOLAR FLARES | **Registration ID:** HK26-0014 | **Event:** CHAKRAVYUH 1.0, BIET Lucknow
 
