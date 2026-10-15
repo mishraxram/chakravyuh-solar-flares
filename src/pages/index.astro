@@ -1,85 +1,115 @@
 ---
 import Base from '../layouts/Base.astro';
 
-// The 3 "Try sample" buttons (files live in public/samples, all made-up sample data)
+// The 3 "Try sample" cases (files live in public/samples, all made-up sample data)
 const samples = [
-  { file: '/samples/erp-marks-tamper.csv', label: 'ERP marks tampering' },
-  { file: '/samples/ssh-bruteforce.log', label: 'Server SSH brute force' },
-  { file: '/samples/hinglish-case.csv', label: 'Hinglish case note' },
+  { file: '/samples/erp-marks-tamper.csv', label: 'ERP marks tampering', desc: 'DBMS marks changed from 42 to 92 at 2 AM' },
+  { file: '/samples/ssh-bruteforce.log', label: 'Server SSH brute force', desc: 'Password guessing, then a root login' },
+  { file: '/samples/hinglish-case.csv', label: 'Hinglish case note', desc: 'Investigator note in Hinglish, AI answers in Hindi' },
 ];
 ---
 <Base>
-  <header class="flex items-center gap-3 mb-2">
-    <h1 class="text-2xl font-bold">LogLens</h1>
+  <header class="mb-6 lg:mb-10">
+    <p class="flex items-center gap-2 mb-3">
+      <svg aria-hidden="true" width="22" height="22" viewBox="0 0 32 32"><rect width="32" height="32" rx="6" fill="#E3A72F"/><circle cx="14" cy="14" r="7" fill="none" stroke="#1B1F24" stroke-width="3"/><path d="M19 19l7 7" stroke="#1B1F24" stroke-width="3" stroke-linecap="round"/></svg>
+      <span class="font-semibold">LogLens</span>
+      <span class="text-muted">digital forensics desk</span>
+    </p>
+    <h1 class="font-cond font-bold text-3xl sm:text-4xl lg:text-5xl leading-[1.08] max-w-3xl">Find who changed what. Prove the log was not touched.</h1>
+    <p class="mt-3 max-w-2xl text-ink/80">Rules flag suspicious events, Gemini explains them, and a SHA-256 hash seals the evidence.</p>
   </header>
-  <p class="mb-5 text-ink/80">Paste a server or ERP log. Get a red-flagged incident timeline, an AI summary, and SHA-256 proof the evidence was not changed.</p>
 
-  <!-- Input -->
-  <section class="bg-white border border-ink/15 rounded-md p-4 mb-6">
-    <div class="flex flex-wrap gap-2 mb-3">
-      <span class="text-sm text-muted self-center">Try sample:</span>
-      {samples.map((s) => (
-        <button type="button" data-sample={s.file} class="sample-btn text-sm border border-ink/30 rounded px-3 py-2 hover:bg-tag/30">
-          {s.label}
-        </button>
-      ))}
+  <div class="grid gap-6 lg:grid-cols-[380px_1fr] items-start">
+    <!-- Left: evidence in -->
+    <aside class="space-y-6">
+      <section class="panel p-4">
+        <h2 class="font-semibold text-lg">Open a case</h2>
+        <p class="text-sm text-muted mb-3">Pick a sample case (made-up data) or paste your own log.</p>
+        <div class="space-y-2 mb-4">
+          {samples.map((s) => (
+            <button type="button" data-sample={s.file} class="sample-btn case-btn font-semibold">
+              {s.label}<span>{s.desc}</span>
+            </button>
+          ))}
+        </div>
+        <label for="log" class="text-sm font-semibold">Log text</label>
+        <textarea id="log" rows="7" spellcheck="false"
+          class="mt-1 w-full font-mono text-sm border border-line rounded-lg p-2 bg-paper/40"
+          placeholder="Paste ERP audit CSV (time,user,role,ip,action,target,detail), Linux auth.log or Apache/Nginx access log lines here. Lines starting with # are case notes."></textarea>
+        <div class="flex flex-wrap gap-2 mt-3">
+          <button id="run" type="button" class="btn btn-primary">Build timeline</button>
+          <label class="btn btn-quiet btn-like">
+            Upload a file <input id="file" type="file" class="sr-only" />
+          </label>
+        </div>
+        <p class="text-xs text-muted mt-2">Timelines work for ERP audit CSV, Linux auth.log and Apache/Nginx logs. Any other file (PDF, image) is hashed as evidence.</p>
+        <p id="msg" class="text-sm mt-2" aria-live="polite"></p>
+      </section>
+
+      <!-- Evidence locker: the signature element (an evidence tag carrying the SHA-256) -->
+      <section id="locker" class="hidden panel p-4">
+        <h2 class="font-semibold text-lg mb-3">Evidence</h2>
+        <div class="evtag ml-4 mb-4">
+          <p class="font-semibold">Evidence tag</p>
+          <p id="evName" class="text-sm mt-1 whitespace-pre-line"></p>
+          <p class="text-xs font-semibold mt-2">SHA-256</p>
+          <p id="evHash" class="font-mono text-xs break-all"></p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <button id="verify" type="button" class="btn btn-primary">Verify integrity</button>
+          <button id="report" type="button" class="btn btn-quiet">Download report</button>
+          <button id="newCase" type="button" class="text-sm text-muted underline px-2">New case</button>
+          <input id="verifyFile" type="file" class="sr-only" aria-label="Choose the same file again to verify" />
+        </div>
+        <div id="verifyOut" class="mt-3" aria-live="polite"></div>
+        <details class="mt-4 text-sm">
+          <summary class="cursor-pointer min-h-11 flex items-center gap-2"><span class="font-semibold">Audit trail</span><span id="chain"></span></summary>
+          <p class="text-xs text-muted mt-1">Each entry stores the hash of the one before it, so editing any entry breaks the chain.</p>
+          <button id="tamperAudit" type="button" class="text-sm underline text-muted">Tamper test: secretly edit entry 1</button>
+          <ol id="auditList" class="font-mono text-xs mt-1 space-y-1 break-all"></ol>
+        </details>
+      </section>
+    </aside>
+
+    <!-- Right: findings out -->
+    <div>
+      <section id="result" class="hidden space-y-5">
+        <div id="notes"></div>
+        <div>
+          <div id="verdict"></div>
+          <p id="stats" class="text-sm text-muted mt-2"></p>
+        </div>
+
+        <!-- AI investigation summary -->
+        <div class="panel p-4 lg:p-5">
+          <div class="flex flex-wrap items-center gap-3">
+            <h2 class="font-semibold text-lg mr-auto">What happened</h2>
+            <div class="seg" role="radiogroup" aria-label="Summary language">
+              <label><input type="radio" name="lang" value="en" checked /> English</label>
+              <label><input type="radio" name="lang" value="hi" /> हिंदी</label>
+            </div>
+            <button id="ai" type="button" class="btn btn-primary">Analyze with AI</button>
+          </div>
+          <p class="text-xs text-muted mt-2">Only the parsed event lines (max 200) go to Google Gemini. Raw files stay in your browser.</p>
+          <p id="aiMsg" class="text-sm mt-2" aria-live="polite"></p>
+          <div id="aiOut" class="mt-3"></div>
+        </div>
+
+        <div class="panel p-4 lg:p-5">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <h2 class="font-semibold text-lg">Timeline</h2>
+            <label class="text-sm flex items-center gap-2 min-h-11 cursor-pointer"><input id="onlyFlags" type="checkbox" class="w-5 h-5 accent-ink" /> Only flagged events</label>
+          </div>
+          <ol id="timeline" class="rail space-y-2 mt-3"></ol>
+        </div>
+      </section>
+
+      <section id="empty" class="panel p-6 lg:p-10">
+        <h2 class="font-cond font-bold text-2xl mb-2">No case open yet</h2>
+        <p class="text-ink/80 max-w-prose">Pick “ERP marks tampering” to watch a 2 AM marks change come apart event by event, or paste your own log. The timeline, the AI summary and the evidence check appear here.</p>
+      </section>
     </div>
-    <textarea id="log" rows="9" spellcheck="false"
-      class="w-full font-mono text-sm border border-ink/20 rounded p-2 bg-paper/50"
-      placeholder="Paste ERP audit CSV (time,user,role,ip,action,target,detail), Linux auth.log or Apache/Nginx access log lines here. Lines starting with # are case notes."></textarea>
-    <div class="flex flex-wrap items-center gap-3 mt-3">
-      <label class="btn-like text-sm border border-ink/30 rounded px-3 py-2 cursor-pointer hover:bg-tag/30 inline-flex items-center">
-        Upload log or any evidence file <input id="file" type="file" class="sr-only" />
-      </label>
-      <button id="run" type="button" class="bg-ink text-paper font-semibold rounded px-4 py-2">Build timeline</button>
-      <span id="msg" class="text-sm text-muted"></span>
-    </div>
-  </section>
-
-  <!-- Evidence locker: the signature element (amber tag carrying the SHA-256) -->
-  <section id="locker" class="hidden bg-white border border-ink/15 rounded-md p-4 mb-6">
-    <div class="flex flex-wrap items-start gap-3">
-      <div class="bg-tag text-ink rounded-sm px-3 py-2 font-mono text-xs max-w-full">
-        <div class="font-semibold tracking-wide">EVIDENCE TAG · SHA-256</div>
-        <div id="evName" class="mt-1"></div>
-        <div id="evHash" class="break-all mt-1"></div>
-      </div>
-      <div class="flex flex-wrap gap-2">
-        <button id="verify" type="button" class="bg-ink text-paper font-semibold rounded px-4 py-2">Verify integrity</button>
-        <button id="report" type="button" class="border border-ink/30 rounded px-4 py-2">Download report</button>
-        <button id="newCase" type="button" class="text-sm text-muted underline px-2">New case</button>
-        <input id="verifyFile" type="file" class="sr-only" aria-label="Choose the same file again to verify" />
-      </div>
-    </div>
-    <div id="verifyOut" class="mt-3"></div>
-    <details class="mt-3 text-xs">
-      <summary class="cursor-pointer text-muted">Audit trail (hash-chained) <span id="chain" class="font-semibold"></span></summary>
-      <button id="tamperAudit" type="button" class="mt-2 underline text-muted">Tamper test: secretly edit audit entry 1</button>
-      <ol id="auditList" class="font-mono mt-1 space-y-0.5"></ol>
-    </details>
-  </section>
-
-  <!-- Result -->
-  <section id="result" class="hidden">
-    <div id="notes" class="mb-3"></div>
-    <div id="verdict" class="rounded-md p-3 mb-3 font-semibold"></div>
-    <p id="stats" class="text-sm text-muted mb-2 font-mono"></p>
-
-    <!-- AI investigation summary -->
-    <div class="bg-white border border-ink/15 rounded-md p-4 mb-4">
-      <div class="flex flex-wrap items-center gap-3">
-        <button id="ai" type="button" class="bg-ink text-paper font-semibold rounded px-4 py-2">Analyze with AI</button>
-        <label class="text-sm flex items-center gap-1"><input type="radio" name="lang" value="en" checked /> English</label>
-        <label class="text-sm flex items-center gap-1"><input type="radio" name="lang" value="hi" /> हिंदी</label>
-        <span id="aiMsg" class="text-sm text-muted"></span>
-      </div>
-      <p class="text-xs text-muted mt-2">Only the parsed event lines (max 200) are sent to Google Gemini. Raw files stay in your browser.</p>
-      <div id="aiOut" class="mt-3"></div>
-    </div>
-
-    <label class="text-sm flex items-center gap-2 mb-2"><input id="onlyFlags" type="checkbox" /> Show only flagged events</label>
-    <ol id="timeline" class="space-y-1.5"></ol>
-  </section>
+  </div>
 </Base>
 
 <script>
@@ -106,7 +136,7 @@ const samples = [
       const res = await fetch(b.dataset.sample!);
       logBox.value = await res.text();
       await lockEvidence(b.dataset.sample!.split('/').pop()!, logBox.value);
-      run();
+      run(true);
     }),
   );
 
@@ -129,7 +159,7 @@ const samples = [
     if (f.size > 2_000_000) { msg.textContent = 'Log too big (max 2 MB).'; return; }
     logBox.value = await f.text();
     await lockEvidence(f.name, logBox.value);
-    run();
+    run(true);
   });
 
   // ---- Evidence locker ----
@@ -140,14 +170,14 @@ const samples = [
     const ev = getEvidence();
     $('locker').classList.toggle('hidden', !ev);
     if (!ev) return;
-    $('evName').textContent = `${ev.name} · ${ev.size} bytes${ev.kind === 'file' ? ` · ${ev.type} · modified ${ev.lastModified}` : ''} · locked ${ev.lockedAt}`;
+    $('evName').textContent = `${ev.name} (${ev.size} bytes)${ev.kind === 'file' ? `\n${ev.type}, modified ${ev.lastModified}` : ''}\nLocked ${ev.lockedAt}`;
     $('evHash').textContent = ev.hash;
     const list = $('auditList'); list.replaceChildren();
     getAudit().forEach((a, i) => list.append(el('li', '', `${i + 1}. ${a.at}  ${a.action}  ${a.detail}  [${a.hash.slice(0, 10)}…]`)));
     const broken = await verifyAuditChain();
     const chain = $('chain');
-    chain.textContent = broken ? `· CHAIN BROKEN at entry ${broken}` : `· chain OK (${getAudit().length} entries)`;
-    chain.className = broken ? 'font-semibold text-flag' : 'font-semibold text-match';
+    chain.textContent = broken ? `CHAIN BROKEN at entry ${broken}` : `chain OK (${getAudit().length} entries)`;
+    chain.className = broken ? 'text-sm font-semibold text-white bg-flag rounded px-2 py-0.5' : 'text-sm font-semibold text-match';
     if (broken) ($('chain').parentElement!.parentElement as HTMLDetailsElement).open = true;
   }
 
@@ -168,10 +198,10 @@ const samples = [
     lastVerify = r;
     const out = $('verifyOut'); out.replaceChildren();
     if (r.match) {
-      out.append(el('p', 'p-3 rounded bg-match text-white font-semibold', 'MATCH: evidence unchanged since it was locked.'));
+      out.append(el('p', 'p-3 rounded-lg bg-match text-white font-semibold', 'MATCH: evidence unchanged since it was locked.'));
     } else {
-      out.append(el('p', 'p-3 rounded bg-flag text-white font-semibold', 'TAMPERED: hash mismatch. The evidence changed after it was locked.'));
-      out.append(el('p', 'font-mono text-xs break-all mt-2', `Locked: ${r.original}`), el('p', 'font-mono text-xs break-all text-flag', `Now:    ${r.current}`));
+      out.append(el('p', 'p-3 rounded-lg bg-flag text-white font-semibold', 'TAMPERED: hash mismatch. The evidence changed after it was locked.'));
+      out.append(el('p', 'font-mono text-xs break-all mt-2', `Locked  ${r.original}`), el('p', 'font-mono text-xs break-all text-flag', `Now     ${r.current}`));
     }
     showLocker();
   }
@@ -196,8 +226,8 @@ const samples = [
 
   showLocker(); // restore a case saved in this browser
 
-  $('run').addEventListener('click', run);
-  $('onlyFlags').addEventListener('change', run);
+  $('run').addEventListener('click', () => run(true));
+  $('onlyFlags').addEventListener('change', () => run());
   $('ai').addEventListener('click', analyze);
 
   // Last parsed result, reused by the AI step
@@ -258,34 +288,34 @@ const samples = [
     const label = r.source === 'ai'
       ? `AI generated (Gemini · ${r.model}). Can be wrong: check the cited events.`
       : 'Offline summary from rules (AI unavailable). Not AI generated.';
-    out.append(el('p', `text-xs font-mono mb-2 inline-block px-2 py-0.5 rounded-sm ${r.source === 'ai' ? 'bg-tag/40' : 'bg-ink/10'}`, label));
+    out.append(el('p', `text-xs mb-3 inline-block px-2 py-1 rounded ${r.source === 'ai' ? 'bg-tag/30' : 'bg-ink/10'}`, label));
     if (r.confidence === 'low' || r.verdict === 'unsure')
-      out.append(el('p', 'mb-2 p-2 rounded bg-tag/30 text-sm', 'Not enough evidence for a clear answer. Next: collect auth logs and database audit logs for the same time window, then run again.'));
+      out.append(el('p', 'mb-3 p-3 rounded-lg bg-tag/25 text-sm', 'Not enough evidence for a clear answer. Next: collect auth logs and database audit logs for the same time window, then run again.'));
     // Verdict chip: status colours only (red incident, amber suspicious, green normal, grey unsure)
-    const vc: Record<string, string> = { incident: 'bg-flag text-white', suspicious: 'bg-tag/50', normal: 'bg-match text-white', unsure: 'bg-ink/10' };
-    out.append(el('p', `block w-fit font-semibold uppercase rounded px-2 py-1 mb-2 ${vc[r.verdict] ?? vc.unsure}`, `Verdict: ${r.verdict} · confidence ${r.confidence}`));
-    out.append(el('p', 'mb-2', r.summary));
-    const ul = el('ul', 'space-y-1 mb-3 text-sm');
+    const vc: Record<string, string> = { incident: 'bg-flag text-white', suspicious: 'bg-tag', normal: 'bg-match text-white', unsure: 'bg-ink/10' };
+    out.append(el('p', `block w-fit font-cond font-bold text-xl rounded-lg px-3 py-1 mb-3 ${vc[r.verdict] ?? vc.unsure}`, `Verdict: ${r.verdict} (${r.confidence} confidence)`));
+    out.append(el('p', 'mb-4 text-[17px] leading-relaxed max-w-prose', r.summary));
+    const ul = el('ul', 'space-y-2 mb-4');
     r.indicators.forEach((i) => {
-      const li = el('li', 'border-l-4 border-flag pl-2');
+      const li = el('li', 'border-l-4 border-flag pl-3');
       li.append(el('span', 'font-mono font-semibold mr-2', i.events.map((n) => `#${n}`).join(' ')), document.createTextNode(i.text));
       ul.append(li);
     });
     out.append(ul);
     // What the AI found that the rules did not say (the "AI-based pattern discovery" part)
     if (r.hidden_patterns?.length) {
-      const box = el('div', 'mb-3 p-3 rounded border-2 border-dashed border-tag');
-      box.append(el('p', 'text-sm font-semibold mb-1', 'AI found beyond the rules'));
-      r.hidden_patterns.forEach((h) => { const p = el('p', 'text-sm'); p.append(el('span', 'font-mono font-semibold mr-2', h.events.map((n) => `#${n}`).join(' ')), document.createTextNode(h.text)); box.append(p); });
+      const box = el('div', 'mb-4 p-3 rounded-lg border-2 border-dashed border-tag bg-tag/10');
+      box.append(el('p', 'font-semibold mb-1', 'AI found beyond the rules'));
+      r.hidden_patterns.forEach((h) => { const p = el('p', 'text-sm mt-1'); p.append(el('span', 'font-mono font-semibold mr-2', h.events.map((n) => `#${n}`).join(' ')), document.createTextNode(h.text)); box.append(p); });
       out.append(box);
     }
-    out.append(el('p', 'text-sm font-semibold', 'Next steps'));
-    const steps = el('ol', 'list-decimal pl-5 text-sm');
+    out.append(el('p', 'font-semibold', 'Next steps'));
+    const steps = el('ol', 'list-decimal pl-5 space-y-1');
     r.next_steps.forEach((s) => steps.append(el('li', '', s)));
     out.append(steps);
   }
 
-  async function run() {
+  async function run(scrollToResult = false) {
     const text = logBox.value;
     if (!text.trim()) { msg.textContent = 'Paste a log or try a sample.'; $('result').classList.add('hidden'); return; }
     msg.textContent = '';
@@ -298,21 +328,22 @@ const samples = [
 
     // Case notes (# lines)
     const notes = $('notes'); notes.replaceChildren();
-    parsed.notes.forEach((n) => notes.append(el('p', 'text-sm italic text-ink/80 border-l-4 border-tag pl-2 mb-1', n)));
+    parsed.notes.forEach((n) => notes.append(el('p', 'italic text-ink/80 border-l-4 border-tag pl-3 mb-1', n)));
 
-    // Verdict
+    // Verdict banner: the first thing a judge reads
     const verdict = $('verdict');
+    const banner = 'rounded-xl px-4 py-4 lg:px-5 font-cond font-bold text-2xl lg:text-3xl leading-tight';
     if (events.length === 0) {
-      verdict.className = 'rounded-md p-3 mb-3 font-semibold bg-ink/10';
+      verdict.className = `${banner} bg-ink/10`;
       verdict.textContent = 'Not a supported log. Use ERP audit CSV, Linux auth.log or Apache/Nginx access log, or try a sample.';
     } else if (v.level === 'none') {
-      verdict.className = 'rounded-md p-3 mb-3 font-semibold bg-match/15 text-match';
-      verdict.textContent = 'No suspicious pattern found by the rules. (Rules can miss things: run the AI summary or check more logs.)';
+      verdict.className = `${banner} bg-match text-white`;
+      verdict.textContent = 'No suspicious pattern found by the rules. Rules can miss things: run the AI summary or check more logs.';
     } else {
-      verdict.className = `rounded-md p-3 mb-3 font-semibold ${v.level === 'high' ? 'bg-flag text-white' : 'bg-tag/40'}`;
-      verdict.textContent = `${v.level.toUpperCase()} RISK: ${v.high} high-risk and ${v.medium} medium-risk events flagged by rules`;
+      verdict.className = `${banner} ${v.level === 'high' ? 'bg-flag text-white' : 'bg-tag'}`;
+      verdict.textContent = `${v.level === 'high' ? 'High' : 'Medium'} risk: ${v.high} high-risk and ${v.medium} medium-risk events flagged by the rules`;
     }
-    $('stats').textContent = `${events.length} events parsed · ${parsed.unparsed.length} lines not understood · sorted by time`;
+    $('stats').textContent = `${events.length} events, sorted by time. ${parsed.unparsed.length} lines not understood.`;
 
     // Timeline
     const list = $('timeline'); list.replaceChildren();
@@ -320,12 +351,14 @@ const samples = [
     for (const e of events) {
       if (onlyFlags && !e.flags.length) continue;
       const high = e.flags.some((f) => f.severity === 'high');
-      const li = el('li', `rounded border p-2 text-sm ${high ? 'border-flag bg-flag/10' : e.flags.length ? 'border-tag bg-tag/15' : 'border-ink/10 bg-white'}`);
-      const top = el('div', 'flex flex-wrap gap-x-3 font-mono text-xs');
-      top.append(el('span', 'font-semibold', `#${e.n}`), el('span', '', e.timeText), el('span', 'font-semibold', e.user || '-'),
-        el('span', 'text-muted', e.role), el('span', '', e.ip), el('span', 'font-semibold', e.action), el('span', 'text-ink/70', `${e.target} ${e.detail}`));
-      li.append(top);
-      for (const f of e.flags) li.append(el('p', `mt-1 ${f.severity === 'high' ? 'text-flag font-semibold' : 'text-ink/80'}`, `⚑ ${f.reason}`));
+      // Each row = one event on the rail; red seal for high risk, amber for medium
+      const li = el('li', `row ${high ? 'is-high' : e.flags.length ? 'is-med' : ''}`);
+      const top = el('div', 'flex flex-wrap items-baseline gap-x-3 gap-y-0.5');
+      top.append(el('span', 'font-mono text-xs text-muted', `#${e.n}`), el('span', 'font-mono text-sm font-semibold', e.timeText),
+        el('span', 'font-semibold', e.user || '-'), el('span', 'text-sm text-muted', e.role), el('span', 'font-mono text-sm', e.ip),
+        el('span', 'font-mono text-sm font-semibold', e.action));
+      li.append(top, el('p', 'font-mono text-xs text-ink/70 break-all mt-0.5', `${e.target} ${e.detail}`));
+      for (const f of e.flags) li.append(el('p', `mt-1 text-sm ${f.severity === 'high' ? 'text-flag font-semibold' : 'text-ink'}`, f.reason));
       list.append(li);
     }
     if (parsed.unparsed.length) {
@@ -337,5 +370,7 @@ const samples = [
     $('result').classList.remove('hidden');
     await audit('TIMELINE_BUILT', `${events.length} events · ${v.high} high · ${v.medium} medium · ${parsed.unparsed.length} not understood`);
     showLocker();
+    // On phones the result is below the input: bring it into view after a new case
+    if (scrollToResult && window.innerWidth < 1024) $('result').scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
   }
 </script>

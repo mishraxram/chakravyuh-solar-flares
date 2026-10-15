@@ -20,19 +20,19 @@ const { title = 'LogLens', description = 'AI-assisted digital forensics: log tim
     <meta property="og:url" content={LIVE_URL} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;600;700&family=Noto+Sans+Devanagari:wght@400;600&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;600;700&family=IBM+Plex+Sans+Condensed:wght@600;700&family=Noto+Sans+Devanagari:wght@400;600&display=swap" rel="stylesheet" />
   </head>
   <body class="font-sans min-h-screen flex flex-col">
-    <main class="flex-1 w-full max-w-4xl mx-auto px-4 py-6">
+    <main class="flex-1 w-full max-w-6xl mx-auto px-4 py-6 lg:py-10">
       <slot />
     </main>
-    <footer class="border-t border-ink/15 text-sm text-muted px-4 py-4">
-      <div class="max-w-4xl mx-auto flex items-center gap-4">
+    <footer class="border-t border-line text-sm text-muted px-4 py-6">
+      <div class="max-w-6xl mx-auto flex items-center gap-4">
         <div class="w-24 h-24 shrink-0" set:html={qrSvg} aria-label={`QR code for ${LIVE_URL}`} role="img"></div>
         <div>
           <p>Try it on your phone: <a class="underline" href={LIVE_URL}>{LIVE_URL.replace('https://', '')}</a></p>
-          <p>SOLAR FLARES · HK26-0014 · CHAKRAVYUH 1.0</p>
-          <p>AI summaries come from Google Gemini and can be wrong. All logs in the "Try sample" buttons are made-up sample data.</p>
+          <p>Built by team SOLAR FLARES (HK26-0014) for CHAKRAVYUH 1.0, BIET Lucknow.</p>
+          <p>AI summaries come from Google Gemini and can be wrong. All sample cases are made-up data.</p>
         </div>
       </div>
     </footer>

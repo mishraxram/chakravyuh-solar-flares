@@ -26,6 +26,7 @@ Repo: https://github.com/mishraxram/chakravyuh-solar-flares
 - Pitch: docs/PITCH.md (3-min script, 60-s opening, 6 slides, 15 Q&A, backup, Hinglish cheat-sheet); DEMO_SCRIPT updated
 - Apache/Nginx access log parser + 3 web rules (web-attack, scan-burst, attack-success). Eval 16 cases: 16, 16, 15 (Hindi >8s once).
 - Ship: secrets scan clean, clean clone from GitHub builds + runs in 3 commands (no key -> AI "not configured", offline path), final deploy, e2e on live: all demo steps pass, 0 JS errors.
+- Premium UI redesign (13:12): two-column evidence desk, evidence tag with hole+string, timeline rail with seal dots, big verdict banner, segmented EN/हिंदी, empty state, phone auto-scroll to result. e2e on prod: all pass, 0 errors.
 
 ## Doing
 - Shipped. Waiting: user records demo video + screenshots, rehearses with docs/PITCH.md and docs/DEFENSE.md
