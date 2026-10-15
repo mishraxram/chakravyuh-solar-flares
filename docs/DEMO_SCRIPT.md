@@ -32,3 +32,8 @@ Live: https://loglens-solarflares.pages.dev · Before the demo: click "New case"
 
 ## Scene 6 — Close (2:10-3:00)
 - Tech line, test result (11/14 → 14/14), next steps, QR code in the footer: "Scan and try your own log."
+
+## New (13:50) — Changes made, Restore, PDF
+- After Scene 2, point at "Changes made": 6 changes, 3 unauthorized. Read one card: "02:09, prof.verma from 49.36.112.7, marks 42 → 92, Unauthorized because the login came after 5 failed tries from a new IP."
+- In Scene 4, after TAMPERED: show "1 line changed after locking" (Before/After), click "Restore original" → MATCH again.
+- Scene 5: click "Save report as PDF" → browser print dialog → Save as PDF.

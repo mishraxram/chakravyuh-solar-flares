@@ -51,3 +51,8 @@
 
 ## AI tools disclosure
 Claude Code wrote most of the code, rules and test cases under our direction; we chose the problem, story, scope and demo, and reviewed results. Gemini is used inside the app for analysis. Say this openly if asked.
+
+## New questions (change register, restore)
+11. **How do you decide "Unauthorized"?** A change is unauthorized if it has a high-risk flag, or if the login that started its session (same user + same IP) had one, e.g. a login right after a failed-login burst. Medium flags only → Suspicious. "DENIED" in the log → Blocked attempt.
+12. **Can you say which person did it?** We show the account and IP. An account can be stolen, so we never name a person; the reasons explain why the account looks hijacked. Next step for the investigator: map the IP via the network/DHCP logs.
+13. **How does restore work?** When text evidence is locked we keep a sealed copy in the browser. If the hash later differs we compare line by line and can put the original back. Limit: only for evidence locked in this browser; for real data recovery you still need the system's database backup.
