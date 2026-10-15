@@ -1,5 +1,7 @@
 # TESTSET (all inputs are sample data we wrote)
 
+**Honest result (2026-10-15 12:33, 3 runs of `node tests/eval.ts` against the live API): 11/14, 13/14, 11/14.** Rules and hashing give the same result every run. The AI part varies. Always fails: case 6 (no impossible-travel rule). Sometimes fails: cases 2 and 5 (AI says confidence "high" for a normal log, meaning "sure it is fine": our field mixes verdict and confidence) and case 9 (once, the AI replied in English when Hindi was asked).
+
 Format A = ERP audit CSV (`time,user,role,ip,action,target,detail`). Format B = Linux auth.log.
 "Flags" = rule flags expected. "AI" = expected AI verdict.
 
