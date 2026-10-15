@@ -22,10 +22,10 @@ Repo: https://github.com/mishraxram/chakravyuh-solar-flares
 - Must-have 3: SHA-256 evidence tag (matches sha256sum), verify MATCH/TAMPERED, audit trail (localStorage), HTML report download, live.
 
 ## Doing
-- Gate B reached: eval-set, judge-me
+- Waiting for user: "fix" for eval failures (verdict field, impossible-travel rule, Hindi check)
 
 ## Next 3 actions
-1. eval-set on docs/TESTSET.md
+1. Eval fixes if user says fix (TESTSET: 11-13/14)
 2. judge-me + top 2 fixes
 3. Polish + QR code + README AI usage
 

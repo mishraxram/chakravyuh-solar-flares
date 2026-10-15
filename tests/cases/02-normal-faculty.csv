@@ -1,0 +1,4 @@
+# SAMPLE TEST: normal faculty marks update in office hours
+2026-10-13 09:10:00,prof.sharma,faculty,10.0.4.30,LOGIN,erp,success
+2026-10-13 11:30:12,prof.sharma,faculty,10.0.4.30,UPDATE,marks/21CS050/OS,33->36
+2026-10-13 11:45:00,prof.sharma,faculty,10.0.4.30,LOGOUT,erp,

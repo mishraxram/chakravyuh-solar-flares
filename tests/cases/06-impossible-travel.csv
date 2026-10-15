@@ -1,0 +1,5 @@
+# SAMPLE TEST: same student logs in from campus and from a far IP 3 minutes apart
+2026-10-15 10:00:00,21cs070,student,10.0.7.12,LOGIN,erp,success
+2026-10-15 10:01:10,21cs070,student,10.0.7.12,VIEW,marks/21CS070,
+2026-10-15 10:03:00,21cs070,student,103.21.58.9,LOGIN,erp,success
+2026-10-15 10:03:40,21cs070,student,103.21.58.9,VIEW,fees/21CS070,

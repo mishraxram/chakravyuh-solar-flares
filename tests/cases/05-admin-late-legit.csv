@@ -1,0 +1,5 @@
+# SAMPLE TEST: admin bulk update late at night with a change ticket (probably legit)
+2026-10-20 10:00:00,admin.exam,admin,10.0.1.5,LOGIN,erp,success
+2026-10-20 23:50:10,admin.exam,admin,10.0.1.5,LOGIN,erp,success
+2026-10-20 23:52:40,admin.exam,admin,10.0.1.5,UPDATE,marks/BULK/SEM5,grace marks +2 for all as per ticket EXAM-2231
+2026-10-20 23:58:00,admin.exam,admin,10.0.1.5,LOGOUT,erp,

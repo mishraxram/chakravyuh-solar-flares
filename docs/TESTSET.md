@@ -21,3 +21,32 @@ Format A = ERP audit CSV (`time,user,role,ip,action,target,detail`). Format B = 
 | 14 | Tamper: same file re-uploaded unchanged | — | Verify -> MATCH | |
 
 Results: (fill after eval-set) passed _/14.
+
+## Results (run 2 of 3, full table)
+
+Inputs: samples in `public/samples/`, extra cases in `tests/cases/`. Runner: `node tests/eval.ts`.
+
+| # | Got | Result | Why failed |
+|---|---|---|---|
+| 1 | 19 events, 0 unparsed, flags: off-hours new-ip role-misuse shared-ip burst-fail login-after-burst marks-jump log-clear (2ms) · AI confidence high | PASS |  |
+| 2 | 3 events, 0 unparsed, flags: none (0ms) · AI confidence low | PASS |  |
+| 3 | 11 events, 0 unparsed, flags: off-hours burst-fail shared-ip login-after-burst root-login (0ms) · AI confidence high | PASS |  |
+| 4 | 6 events, 0 unparsed, flags: burst-fail shared-ip (0ms) · AI confidence high | PASS |  |
+| 5 | 4 events, 0 unparsed, flags: off-hours (0ms) · AI confidence low | PASS |  |
+| 6 | 4 events, 0 unparsed, flags: new-ip (0ms) · AI confidence high | FAIL | missing flag impossible-travel |
+| 7 | 0 events, 0 unparsed, flags: none (0ms) | PASS |  |
+| 8 | 0 events, 3 unparsed, flags: none (0ms) | PASS |  |
+| 9 | 6 events, 0 unparsed, flags: off-hours new-ip shared-ip marks-jump log-clear (0ms) · AI confidence high | PASS |  |
+| 10 | 19 events, 0 unparsed, flags: off-hours new-ip role-misuse shared-ip burst-fail login-after-burst marks-jump log-clear (0ms) | PASS |  |
+| 11 | 4999 events, 0 unparsed, flags: off-hours new-ip role-misuse shared-ip burst-fail login-after-burst marks-jump log-clear (15ms) | PASS |  |
+| 12 | 2 events, 0 unparsed, flags: log-clear (0ms) · AI confidence high | PASS |  |
+| 13 | one char changed -> hash differs: true | PASS | |
+| 14 | same file re-read -> hash equal: true | PASS | |
+
+## Failures seen across 3 runs
+| Case | Runs failed | Reason | Cheap fix |
+|---|---|---|---|
+| 6 impossible travel | 3/3 | No rule for "same user, 2 different networks within minutes" (only new-ip fires) | add one rule (~10 lines) |
+| 2 normal faculty | 2/3 | AI confidence "high" for a clean log: confidence is about its own conclusion, not about risk | add a separate `verdict` field (incident / suspicious / no_incident / unsure) to the prompt and UI |
+| 5 admin late, with ticket | 1/3 | same as case 2 | same fix |
+| 9 Hinglish -> Hindi | 1/3 | AI replied in English once | check Devanagari on server, retry once / show note |

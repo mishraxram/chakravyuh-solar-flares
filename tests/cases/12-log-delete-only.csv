@@ -1,0 +1,3 @@
+# SAMPLE TEST: only an audit log deletion in office hours
+2026-10-16 13:58:00,admin.it,admin,10.0.1.9,LOGIN,erp,success
+2026-10-16 14:00:00,admin.it,admin,10.0.1.9,DELETE,audit_log,rows 1-900
