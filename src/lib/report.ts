@@ -2,7 +2,7 @@
 import type { LogEvent } from './parse.ts';
 import type { Evidence, AuditEntry } from './evidence.ts';
 
-type Ai = { source: string; model?: string; summary: string; indicators: { events: number[]; text: string }[]; confidence: string; next_steps: string[] } | null;
+type Ai = { source: string; verdict: string; model?: string; summary: string; indicators: { events: number[]; text: string }[]; confidence: string; next_steps: string[] } | null;
 
 // Escape everything that came from the log or the AI
 const esc = (s: unknown) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
@@ -30,7 +30,7 @@ ${flagged.map((e) => `<tr><td>${e.n}</td><td class="m">${esc(e.timeText)}</td><t
 </table>
 <h2>Summary</h2>
 ${ai ? `<p><em>${ai.source === 'ai' ? `AI generated (Gemini ${esc(ai.model)}). Verify against cited events.` : 'Offline summary from rules (not AI).'}</em></p>
-<p>${esc(ai.summary)}</p><p>Confidence: ${esc(ai.confidence)}</p>
+<p>${esc(ai.summary)}</p><p><strong>Verdict: ${esc(ai.verdict)}</strong> · confidence ${esc(ai.confidence)}</p>
 <ul>${ai.indicators.map((i) => `<li><code>${i.events.map((n) => '#' + n).join(' ')}</code> ${esc(i.text)}</li>`).join('')}</ul>
 <p>Next steps:</p><ol>${ai.next_steps.map((s) => `<li>${esc(s)}</li>`).join('')}</ol>` : '<p>AI summary not run.</p>'}
 <h2>Audit trail</h2>

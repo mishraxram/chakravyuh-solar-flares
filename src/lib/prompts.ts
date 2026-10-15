@@ -16,13 +16,14 @@ Investigator case notes (may be Hinglish): ${notes.length ? notes.join(' | ') : 
 Task:
 1. Explain what most likely happened, in 2-4 short sentences.
 2. List at most 5 attack indicators, max 25 words each. Each indicator MUST cite the event numbers (#n) it is based on. Do not invent events.
-3. Give confidence: "low", "medium" or "high". Use "low" if the evidence is thin or could be normal activity.
+3. Give a verdict: "incident" (clear attack or misuse), "suspicious" (worth checking), "normal" (looks like routine work) or "unsure" (not enough data).
+   Give confidence in that verdict: "low", "medium" or "high". Use "low" if the evidence is thin.
 4. Give 2-3 concrete next steps (max 20 words each) for the investigator (what to check or collect next).
 Never claim certainty about a person's identity; say "the account" or "the IP" unless logs prove more.
 ${language}
 
 Reply ONLY with JSON in this shape:
-{"summary": string, "indicators": [{"events": number[], "text": string}], "confidence": "low"|"medium"|"high", "next_steps": string[]}
+{"verdict": "incident"|"suspicious"|"normal"|"unsure", "summary": string, "indicators": [{"events": number[], "text": string}], "confidence": "low"|"medium"|"high", "next_steps": string[]}
 
 Events:
 ${events.map((e) => `#${e.n} ${e.timeText} user=${e.user || '-'} role=${e.role || '-'} ip=${e.ip || '-'} ${e.action} ${e.target} ${e.detail}${e.flags.length ? ` [flags: ${e.flags.join('; ')}]` : ''}`).join('\n')}`;

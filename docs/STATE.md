@@ -20,13 +20,14 @@ Repo: https://github.com/mishraxram/chakravyuh-solar-flares
 - Must-have 1: parser (ERP CSV + auth.log) + 9 rules + timeline + 3 sample buttons, live. Check: node scripts/check-rules.ts
 - Must-have 2: /api/analyze (Gemini lite models chain, 8s budget) + EN/Hindi + offline rule-based fallback, live. 3/3 live calls OK (5-7s).
 - Must-have 3: SHA-256 evidence tag (matches sha256sum), verify MATCH/TAMPERED, audit trail (localStorage), HTML report download, live.
+- Eval: 14/14 x3 runs after fixes (verdict field, impossible-travel rule, Hindi retry)
 
 ## Doing
-- Waiting for user: "fix" for eval failures (verdict field, impossible-travel rule, Hindi check)
+- judge-me review
 
 ## Next 3 actions
-1. Eval fixes if user says fix (TESTSET: 11-13/14)
-2. judge-me + top 2 fixes
+1. judge-me + top 2 fixes
+2. Polish: QR code, mobile touch targets, README AI usage
 3. Polish + QR code + README AI usage
 
 ## Notes

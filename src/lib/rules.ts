@@ -67,6 +67,14 @@ export function applyRules(events: LogEvent[]): LogEvent[] {
     if (e.action === 'LOGIN' && e.user === 'root')
       add(e, 'root-login', `Direct login as root from ${e.ip}`, 'high');
 
+    // 10. Same user logged in from two different IPs within 10 minutes (shared or stolen password)
+    if (e.action === 'LOGIN') {
+      const prev = events.slice(0, i).reverse().find(
+        (p) => p.action === 'LOGIN' && p.user === e.user && p.ip && p.ip !== e.ip && t - p.time.getTime() <= 10 * 60_000,
+      );
+      if (prev) add(e, 'impossible-travel', `${e.user} logged in from ${prev.ip} and ${e.ip} within ${Math.round((t - prev.time.getTime()) / 60_000)} min: shared or stolen password?`, 'medium');
+    }
+
     // Remember who used what (only after checks, so the current event is compared with the past)
     if (e.user && e.ip && e.action !== 'LOGIN_FAIL') {
       if (!ipsByUser.has(e.user)) ipsByUser.set(e.user, new Set());

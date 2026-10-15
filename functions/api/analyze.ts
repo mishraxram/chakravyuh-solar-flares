@@ -45,6 +45,9 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
       if (!res.ok) { lastError = `AI error ${res.status}`; continue; }
       const data: any = await res.json();
       const ai = JSON.parse(data?.candidates?.[0]?.content?.parts?.[0]?.text ?? '');
+      // Hindi asked but no Devanagari in the reply: try the next model instead of showing English
+      if (lang === 'hi' && !/[ऀ-ॿ]/.test(String(ai.summary))) { lastError = 'AI replied in the wrong language'; continue; }
+      if (!['incident', 'suspicious', 'normal', 'unsure'].includes(ai.verdict)) ai.verdict = 'unsure';
 
       // 3. Keep only indicators that cite real event numbers (guards against made-up events)
       const valid = new Set(events.map((e) => e.n));

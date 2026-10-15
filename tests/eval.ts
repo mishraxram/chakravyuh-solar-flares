@@ -13,23 +13,23 @@ type Case = {
   must?: string[];      // rule codes that must appear
   mustNot?: string[];   // rule codes that must NOT appear
   noFlags?: boolean; noEvents?: boolean;
-  ai?: string[];        // allowed AI confidence values
+  ai?: string[];        // allowed AI verdicts
   hindi?: boolean;      // AI summary must contain Devanagari
 };
 
 const cases: Case[] = [
-  { id: 1, file: S + 'erp-marks-tamper.csv', must: ['burst-fail', 'off-hours', 'new-ip', 'role-misuse', 'log-clear', 'marks-jump', 'login-after-burst'], ai: ['high'] },
-  { id: 2, file: T + '02-normal-faculty.csv', noFlags: true, ai: ['low'] },
-  { id: 3, file: S + 'ssh-bruteforce.log', must: ['burst-fail', 'root-login', 'login-after-burst'], ai: ['high'] },
-  { id: 4, file: T + '04-bruteforce-fail-only.log', must: ['burst-fail'], mustNot: ['login-after-burst', 'root-login'], ai: ['medium', 'high'] },
-  { id: 5, file: T + '05-admin-late-legit.csv', must: ['off-hours'], mustNot: ['marks-jump', 'role-misuse', 'log-clear'], ai: ['low', 'medium'] },
-  { id: 6, file: T + '06-impossible-travel.csv', must: ['impossible-travel'], ai: ['medium', 'high'] },
+  { id: 1, file: S + 'erp-marks-tamper.csv', must: ['burst-fail', 'off-hours', 'new-ip', 'role-misuse', 'log-clear', 'marks-jump', 'login-after-burst'], ai: ['incident'] },
+  { id: 2, file: T + '02-normal-faculty.csv', noFlags: true, ai: ['normal'] },
+  { id: 3, file: S + 'ssh-bruteforce.log', must: ['burst-fail', 'root-login', 'login-after-burst'], ai: ['incident'] },
+  { id: 4, file: T + '04-bruteforce-fail-only.log', must: ['burst-fail'], mustNot: ['login-after-burst', 'root-login'], ai: ['incident', 'suspicious'] },
+  { id: 5, file: T + '05-admin-late-legit.csv', must: ['off-hours'], mustNot: ['marks-jump', 'role-misuse', 'log-clear'], ai: ['normal', 'suspicious', 'unsure'] },
+  { id: 6, file: T + '06-impossible-travel.csv', must: ['impossible-travel'], ai: ['incident', 'suspicious'] },
   { id: 7, file: T + '07-empty.txt', noEvents: true },
   { id: 8, file: T + '08-poem.txt', noEvents: true },
-  { id: 9, file: S + 'hinglish-case.csv', lang: 'hi', must: ['marks-jump', 'log-clear', 'new-ip', 'shared-ip'], ai: ['high'], hindi: true },
+  { id: 9, file: S + 'hinglish-case.csv', lang: 'hi', must: ['marks-jump', 'log-clear', 'new-ip', 'shared-ip'], ai: ['incident'], hindi: true },
   { id: 10, file: T + '10-shuffled.csv', must: ['burst-fail', 'role-misuse', 'log-clear', 'marks-jump', 'login-after-burst'] },
   { id: 11, file: T + '11-big.csv', must: ['burst-fail', 'log-clear', 'marks-jump'] },
-  { id: 12, file: T + '12-log-delete-only.csv', must: ['log-clear'], mustNot: ['off-hours'], ai: ['medium', 'high'] },
+  { id: 12, file: T + '12-log-delete-only.csv', must: ['log-clear'], mustNot: ['off-hours'], ai: ['incident', 'suspicious'] },
 ];
 
 // Same "flagged events first, max 200" logic as the browser
@@ -61,8 +61,8 @@ for (const c of cases) {
       const d: any = await res.json();
       if (!d.summary) problems.push(`AI failed: ${d.error}`);
       else {
-        got += ` · AI confidence ${d.confidence}`;
-        if (!c.ai.includes(d.confidence)) problems.push(`AI confidence ${d.confidence}, expected ${c.ai.join('/')}`);
+        got += ` · AI ${d.verdict} (${d.confidence})`;
+        if (!c.ai.includes(d.verdict)) problems.push(`AI verdict ${d.verdict}, expected ${c.ai.join('/')}`);
         if (c.hindi && !/[ऀ-ॿ]/.test(d.summary)) problems.push('AI summary not in Hindi');
       }
     } catch (e) { problems.push(`AI call error ${(e as Error).message}`); }

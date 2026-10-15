@@ -172,7 +172,7 @@ const samples = [
   // Last parsed result, reused by the AI step
   let last: ReturnType<typeof parseLog> | null = null;
 
-  type AiResult = { source: string; model?: string; summary: string; indicators: { events: number[]; text: string }[]; confidence: string; next_steps: string[] };
+  type AiResult = { source: string; verdict: string; model?: string; summary: string; indicators: { events: number[]; text: string }[]; confidence: string; next_steps: string[] };
 
   // Ask the server (which asks Gemini). On any failure, fall back to a summary built from the rules.
   async function analyze() {
@@ -213,6 +213,7 @@ const samples = [
     const groups = [...byCode.values()].sort((a, b) => Number(b.high) - Number(a.high));
     return {
       source: 'offline',
+      verdict: flagged.some((e) => e.flags.some((f) => f.severity === 'high')) ? 'suspicious' : 'unsure',
       summary: flagged.length ? `Rules flagged ${flagged.length} of ${last!.events.length} events. Review the indicators below.` : 'Rules found nothing suspicious.',
       indicators: groups.slice(0, 6).map((g) => ({ events: g.ns, text: g.text })),
       confidence: flagged.length >= 3 ? 'medium' : 'low',
@@ -226,10 +227,12 @@ const samples = [
       ? `AI generated (Gemini · ${r.model}). Can be wrong: check the cited events.`
       : 'Offline summary from rules (AI unavailable). Not AI generated.';
     out.append(el('p', `text-xs font-mono mb-2 inline-block px-2 py-0.5 rounded-sm ${r.source === 'ai' ? 'bg-tag/40' : 'bg-ink/10'}`, label));
-    if (r.confidence === 'low')
+    if (r.confidence === 'low' || r.verdict === 'unsure')
       out.append(el('p', 'mb-2 p-2 rounded bg-tag/30 text-sm', 'Not enough evidence for a clear answer. Next: collect auth logs and database audit logs for the same time window, then run again.'));
+    // Verdict chip: status colours only (red incident, amber suspicious, green normal, grey unsure)
+    const vc: Record<string, string> = { incident: 'bg-flag text-white', suspicious: 'bg-tag/50', normal: 'bg-match text-white', unsure: 'bg-ink/10' };
+    out.append(el('p', `block w-fit font-semibold uppercase rounded px-2 py-1 mb-2 ${vc[r.verdict] ?? vc.unsure}`, `Verdict: ${r.verdict} · confidence ${r.confidence}`));
     out.append(el('p', 'mb-2', r.summary));
-    out.append(el('p', 'text-sm mb-1', `Confidence: ${r.confidence}`));
     const ul = el('ul', 'space-y-1 mb-3 text-sm');
     r.indicators.forEach((i) => {
       const li = el('li', 'border-l-4 border-flag pl-2');
