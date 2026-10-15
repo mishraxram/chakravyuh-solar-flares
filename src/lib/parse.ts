@@ -1,5 +1,5 @@
 // Turns raw log text into a sorted list of events.
-// Supports 2 formats: ERP audit CSV and Linux auth.log (sshd lines).
+// Supports 3 formats: ERP audit CSV, Linux auth.log (sshd lines), Apache/Nginx access log.
 
 export type Flag = { code: string; reason: string; severity: 'high' | 'medium' };
 
@@ -66,6 +66,20 @@ function parseAuthLine(line: string, year: number): Omit<LogEvent, 'n' | 'flags'
   return { ...base, user: '', action: 'SSHD' };
 }
 
+// Apache / Nginx access log (common + combined format):
+// 49.36.1.7 - - [14/Oct/2026:02:07:15 +0530] "GET /admin/login.php?id=1' OR 1=1-- HTTP/1.1" 200 512 "-" "sqlmap"
+function parseAccessLine(line: string): Omit<LogEvent, 'n' | 'flags' | 'timeText'> | null {
+  const m = line.match(/^(\S+) \S+ (\S+) \[(\d{2})\/([A-Z][a-z]{2})\/(\d{4}):(\d{2}):(\d{2}):(\d{2})[^\]]*\] "(\S+) (\S+)[^"]*" (\d{3}) \S+(?: "[^"]*" "([^"]*)")?/);
+  if (!m || !MONTHS.includes(m[4])) return null;
+  const time = new Date(+m[5], MONTHS.indexOf(m[4]), +m[3], +m[6], +m[7], +m[8]); // time as written in the log
+  let path = m[10];
+  try { path = decodeURIComponent(path.replace(/\+/g, ' ')); } catch { /* keep the raw path if it is badly encoded */ }
+  return {
+    time, user: m[2] === '-' ? '' : m[2], role: 'web', ip: m[1], action: `HTTP_${m[9].toUpperCase()}`,
+    target: path.slice(0, 200), detail: `status ${m[11]}${m[12] ? ` · ${m[12].slice(0, 60)}` : ''}`, raw: line,
+  };
+}
+
 export function parseLog(text: string, year = new Date().getFullYear()): ParseResult {
   const notes: string[] = [];
   const unparsed: string[] = [];
@@ -76,7 +90,7 @@ export function parseLog(text: string, year = new Date().getFullYear()): ParseRe
     if (!line) continue;
     if (line.startsWith('#')) { notes.push(line.replace(/^#\s*/, '')); continue; }
     if (/^time,user,role/i.test(line)) continue; // CSV header
-    const ev = parseErpLine(line) ?? parseAuthLine(line, year);
+    const ev = parseErpLine(line) ?? parseAuthLine(line, year) ?? parseAccessLine(line);
     if (ev) rows.push(ev); else unparsed.push(line);
   }
 

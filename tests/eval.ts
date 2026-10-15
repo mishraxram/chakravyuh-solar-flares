@@ -30,6 +30,8 @@ const cases: Case[] = [
   { id: 10, file: T + '10-shuffled.csv', must: ['burst-fail', 'role-misuse', 'log-clear', 'marks-jump', 'login-after-burst'] },
   { id: 11, file: T + '11-big.csv', must: ['burst-fail', 'log-clear', 'marks-jump'] },
   { id: 12, file: T + '12-log-delete-only.csv', must: ['log-clear'], mustNot: ['off-hours'], ai: ['incident', 'suspicious'] },
+  { id: 15, file: T + '15-web-attack.log', must: ['web-attack', 'scan-burst', 'attack-success'], ai: ['incident', 'suspicious'] },
+  { id: 16, file: T + '16-web-normal.log', noFlags: true, ai: ['normal', 'unsure'] },
 ];
 
 // Same "flagged events first, max 200" logic as the browser

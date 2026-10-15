@@ -22,7 +22,7 @@ Live: https://loglens-solarflares.pages.dev (QR on every page footer)
 "It runs on Cloudflare. Ten rules are plain TypeScript, fast and explainable. Gemini runs on the server, with an 8-second limit and backup models. If AI fails, we show a rule-based summary, clearly marked not AI. We remove any AI point that cites an event that does not exist."
 
 **2:30-2:50 Impact and next steps**
-"This helps college IT cells, small company admins and cyber cells do the first hour of an investigation in minutes. We tested 14 cases we wrote: 14 out of 14 in three runs. Before our fixes it was 11. Next: more log formats, and storing hashes on a server so the trail cannot be wiped."
+"This helps college IT cells, small company admins and cyber cells do the first hour of an investigation in minutes. We tested 16 cases we wrote. Three runs: 16, 16 and 15 out of 16. The one miss was a slow Hindi answer, and the app showed the offline summary. Before our fixes it was 11 of 14. Next: more log formats, and storing hashes on a server so the trail cannot be wiped."
 
 **2:50-3:00 Close**
 "LogLens: find what happened, and prove the evidence was not changed. Scan the QR and try your own log. Thank you."

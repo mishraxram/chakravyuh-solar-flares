@@ -24,6 +24,7 @@ Repo: https://github.com/mishraxram/chakravyuh-solar-flares
 - judge-me (~73/100) fixes: AI "beyond the rules" hidden_patterns; hash-chained audit trail + tamper test button (e2e: OK -> BROKEN at entry 1)
 - Polish: QR code (build-time SVG), 44px buttons, focus ring, any-file SHA-256 (bytes + metadata) with re-verify, README rewrite, og tags. e2e 360px: no h-scroll, no small buttons, 0 errors
 - Pitch: docs/PITCH.md (3-min script, 60-s opening, 6 slides, 15 Q&A, backup, Hinglish cheat-sheet); DEMO_SCRIPT updated
+- Apache/Nginx access log parser + 3 web rules (web-attack, scan-burst, attack-success). Eval 16 cases: 16, 16, 15 (Hindi >8s once).
 
 ## Doing
 - Rehearsal + backup recordings

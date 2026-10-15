@@ -1,6 +1,6 @@
 # TESTSET (all inputs are sample data we wrote)
 
-**Current honest result (2026-10-15 12:33, after fixes, 3 runs of `node tests/eval.ts` against the live API): 14/14, 14/14, 14/14.** Small set (14 cases we wrote ourselves), so this shows the demo path is stable, not that the tool is accurate on all real-world logs. AI answers can still vary between runs.
+**Current honest result (2026-10-15 12:53, 16 cases incl. 2 web-log cases, 3 runs of `node tests/eval.ts` against the live API): 16/16, 16/16, 15/16.** The one failure: case 9 (Hindi) took longer than 8 s once, so the app showed the offline rules summary instead. Earlier 14-case runs after fixes: 14/14 x3. Small set (14 cases we wrote ourselves), so this shows the demo path is stable, not that the tool is accurate on all real-world logs. AI answers can still vary between runs.
 
 Before fixes: 11/14, 13/14, 11/14. Fixes: added `verdict` field separate from confidence (cases 2, 5), added impossible-travel rule (case 6), server retries another model if Hindi was asked but the reply is not in Devanagari (case 9).
 
@@ -72,3 +72,9 @@ Inputs: samples in `public/samples/`, extra cases in `tests/cases/`. Runner: `no
 | 12 | 2 events, 0 unparsed, flags: log-clear (0ms) · AI suspicious (medium) | PASS |  |
 | 13 | one char changed -> hash differs: true | PASS | |
 | 14 | same file re-read -> hash equal: true | PASS | |
+
+## Added cases 15-16 (Apache/Nginx access log)
+| # | Input | Expected flags | Expected AI verdict |
+|---|---|---|---|
+| 15 | `tests/cases/15-web-attack.log`: 12 not-found scans, SQL injection, path traversal, .env probe, then admin login + marks update from same IP | web-attack, scan-burst, attack-success | incident / suspicious |
+| 16 | `tests/cases/16-web-normal.log`: daytime page views, one favicon 404 | none | normal / unsure |

@@ -26,7 +26,7 @@ const samples = [
     </div>
     <textarea id="log" rows="9" spellcheck="false"
       class="w-full font-mono text-sm border border-ink/20 rounded p-2 bg-paper/50"
-      placeholder="Paste ERP audit CSV (time,user,role,ip,action,target,detail) or Linux auth.log lines here. Lines starting with # are case notes."></textarea>
+      placeholder="Paste ERP audit CSV (time,user,role,ip,action,target,detail), Linux auth.log or Apache/Nginx access log lines here. Lines starting with # are case notes."></textarea>
     <div class="flex flex-wrap items-center gap-3 mt-3">
       <label class="btn-like text-sm border border-ink/30 rounded px-3 py-2 cursor-pointer hover:bg-tag/30 inline-flex items-center">
         Upload log or any evidence file <input id="file" type="file" class="sr-only" />
@@ -304,7 +304,7 @@ const samples = [
     const verdict = $('verdict');
     if (events.length === 0) {
       verdict.className = 'rounded-md p-3 mb-3 font-semibold bg-ink/10';
-      verdict.textContent = 'Not a supported log. Use ERP audit CSV or Linux auth.log, or try a sample.';
+      verdict.textContent = 'Not a supported log. Use ERP audit CSV, Linux auth.log or Apache/Nginx access log, or try a sample.';
     } else if (v.level === 'none') {
       verdict.className = 'rounded-md p-3 mb-3 font-semibold bg-match/15 text-match';
       verdict.textContent = 'No suspicious pattern found by the rules. (Rules can miss things: run the AI summary or check more logs.)';

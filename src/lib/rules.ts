@@ -12,10 +12,20 @@ function add(e: LogEvent, code: string, reason: string, severity: Flag['severity
 
 const hhmm = (e: LogEvent) => e.timeText.slice(11, 16);
 
+// Common attack patterns seen in web request URLs, with a plain-English name
+const WEB_ATTACKS: [RegExp, string][] = [
+  [/union\s+select|'\s*or\s+'?1'?\s*=\s*'?1|'\s*--|;\s*drop\s+table|sleep\(\d+\)/i, 'SQL injection'],
+  [/\.\.\/|\.\.\\|\/etc\/passwd|win\.ini/i, 'Path traversal'],
+  [/<script|javascript:|onerror\s*=/i, 'Cross-site scripting (XSS)'],
+  [/\/\.env|\/\.git\/|wp-config\.php|phpmyadmin/i, 'Secret file probe'],
+  [/;\s*(cat|wget|curl|nc)\s|\|\s*(cat|wget|curl)\s|\$\(/i, 'Command injection'],
+];
+
 export function applyRules(events: LogEvent[]): LogEvent[] {
   const ipsByUser = new Map<string, Set<string>>();  // IPs each user was seen on
   const usersByIp = new Map<string, Set<string>>();  // users seen on each IP
   const burstIps = new Map<string, number>();         // ip -> time of last burst
+  const attackIps = new Set<string>();                // IPs that sent attack-looking web requests
 
   events.forEach((e, i) => {
     const t = e.time.getTime();
@@ -73,6 +83,30 @@ export function applyRules(events: LogEvent[]): LogEvent[] {
         (p) => p.action === 'LOGIN' && p.user === e.user && p.ip && p.ip !== e.ip && t - p.time.getTime() <= 10 * 60_000,
       );
       if (prev) add(e, 'impossible-travel', `${e.user} logged in from ${prev.ip} and ${e.ip} within ${Math.round((t - prev.time.getTime()) / 60_000)} min: shared or stolen password?`, 'medium');
+    }
+
+    // ---- Web server (Apache/Nginx) rules ----
+    if (e.action.startsWith('HTTP_')) {
+      const status = Number(e.detail.match(/status (\d{3})/)?.[1] ?? 0);
+
+      // 11. Attack pattern inside the URL
+      const attack = WEB_ATTACKS.find(([re]) => re.test(e.target));
+      if (attack) {
+        attackIps.add(e.ip);
+        add(e, 'web-attack', `${attack[1]} pattern in URL from ${e.ip} (server replied ${status})`, 'high');
+      }
+
+      // 12. Many "not found" replies to one IP in a minute = someone scanning for hidden pages
+      if (status === 404) {
+        const window = events.slice(0, i + 1).filter(
+          (p) => p.ip === e.ip && p.action.startsWith('HTTP_') && / 404/.test(p.detail) && t - p.time.getTime() <= 60_000,
+        );
+        if (window.length >= 10) window.forEach((p) => add(p, 'scan-burst', `${window.length} not-found requests in 1 min from ${e.ip}: page scanning`, 'medium'));
+      }
+
+      // 13. The attacking IP later gets a successful reply on an admin/login page
+      if (attackIps.has(e.ip) && status >= 200 && status < 400 && /admin|login|wp-/i.test(e.target) && !attack)
+        add(e, 'attack-success', `IP ${e.ip} that sent attack requests got a ${status} reply on ${e.target.split('?')[0]}`, 'high');
     }
 
     // Remember who used what (only after checks, so the current event is compared with the past)
